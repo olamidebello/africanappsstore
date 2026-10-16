@@ -50,8 +50,8 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
-        if self.command=='GET' and path in ('/','/static/app.js','/static/style.css'):
-            file=ROOT/({'/':'templates/index.html'}.get(path,path.lstrip('/'))); raw=file.read_bytes(); self.send_response(200); self.headers_out('text/html' if path=='/' else 'text/javascript' if path.endswith('.js') else 'text/css',len(raw)); self.end_headers(); self.wfile.write(raw); return
+        if self.command=='GET' and path in ('/','/static/app.js','/static/style.css','/static/logo.jpg'):
+            file=ROOT/({'/':'templates/index.html'}.get(path,path.lstrip('/'))); raw=file.read_bytes(); self.send_response(200); self.headers_out('text/html' if path=='/' else 'text/javascript' if path.endswith('.js') else 'image/jpeg' if path.endswith('.jpg') else 'text/css',len(raw)); self.end_headers(); self.wfile.write(raw); return
         with db() as c:
             cookies=dict(x.strip().split('=',1) for x in self.headers.get('Cookie','').split(';') if '=' in x)
             session=c.execute('SELECT sessions.*,users.name,users.email,users.role FROM sessions JOIN users ON users.id=user_id WHERE token=? AND expires>?',(cookies.get('session',''),time.time())).fetchone()
