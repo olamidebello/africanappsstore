@@ -1,0 +1,153 @@
+---
+- name: Deploy African Apps Store on Debian or Ubuntu
+  hosts: store
+  become: true
+  vars:
+    store_domain: africanappsstore.space
+    store_email: "{{ lookup('env', 'ADMIN_EMAIL') }}"
+    store_password: "{{ lookup('env', 'ADMIN_PASSWORD') }}"
+  pre_tasks:
+    - name: Validate deployment inputs
+      ansible.builtin.assert:
+        that:
+          - store_domain is match('^[a-zA-Z0-9.-]+$')
+          - store_email | length > 3
+          - store_password | length >= 14
+        fail_msg: Set ADMIN_EMAIL and ADMIN_PASSWORD (14+ characters); configure DNS before deployment.
+      no_log: true
+  tasks:
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name: [python3, nginx, certbot, python3-certbot-nginx, sqlite3]
+        update_cache: true
+        state: present
+    - name: Create service user
+      ansible.builtin.user:
+        name: africanstore
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+    - name: Create code directory
+      ansible.builtin.file:
+        path: /opt/africanappsstore
+        state: directory
+        owner: root
+        mode: '0755'
+    - name: Create persistent data directory
+      ansible.builtin.file:
+        path: /var/lib/africanappsstore
+        state: directory
+        owner: africanstore
+        group: africanstore
+        mode: '0700'
+    - name: Copy application
+      ansible.builtin.copy:
+        src: "{{ playbook_dir }}/../{{ item }}"
+        dest: /opt/africanappsstore/
+        owner: root
+        mode: preserve
+      loop: [app.py, templates, static]
+      notify: Restart store
+    - name: Bootstrap administrator without storing password
+      ansible.builtin.command: python3 -c 'import app; app.init()'
+      args:
+        chdir: /opt/africanappsstore
+      become_user: africanstore
+      environment:
+        STORE_DATA: /var/lib/africanappsstore
+        ADMIN_EMAIL: "{{ store_email }}"
+        ADMIN_PASSWORD: "{{ store_password }}"
+      no_log: true
+      changed_when: false
+    - name: Install service
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/africanappsstore.service
+        mode: '0644'
+        content: |
+          [Unit]
+          Description=African Apps Store
+          After=network.target
+          [Service]
+          User=africanstore
+          Group=africanstore
+          WorkingDirectory=/opt/africanappsstore
+          Environment=STORE_DATA=/var/lib/africanappsstore COOKIE_SECURE=1 BIND=127.0.0.1 PORT=8080
+          ExecStart=/usr/bin/python3 /opt/africanappsstore/app.py
+          Restart=on-failure
+          NoNewPrivileges=true
+          PrivateTmp=true
+          ProtectSystem=strict
+          ProtectHome=true
+          ReadWritePaths=/var/lib/africanappsstore
+          UMask=0077
+          [Install]
+          WantedBy=multi-user.target
+      notify: Restart store
+    - name: Configure request throttling
+      ansible.builtin.copy:
+        dest: /etc/nginx/conf.d/africanstore-limits.conf
+        mode: '0644'
+        content: |
+          limit_req_zone $binary_remote_addr zone=african_auth:10m rate=5r/m;
+      notify: Reload nginx
+    - name: Configure domain
+      ansible.builtin.copy:
+        dest: "/etc/nginx/sites-available/{{ store_domain }}"
+        mode: '0644'
+        force: false
+        content: |
+          server {
+            listen 80;
+            server_name {{ store_domain }};
+            client_max_body_size 25m;
+            location ~ ^/api/(login|register)$ {
+              limit_req zone=african_auth burst=5 nodelay;
+              proxy_pass http://127.0.0.1:8080;
+              proxy_set_header Host $host;
+            }
+            location / {
+              proxy_pass http://127.0.0.1:8080;
+              proxy_set_header Host $host;
+            }
+          }
+      notify: Reload nginx
+    - name: Enable domain
+      ansible.builtin.file:
+        src: "/etc/nginx/sites-available/{{ store_domain }}"
+        dest: "/etc/nginx/sites-enabled/{{ store_domain }}"
+        state: link
+      notify: Reload nginx
+    - name: Start store
+      ansible.builtin.systemd:
+        name: africanappsstore
+        daemon_reload: true
+        state: started
+        enabled: true
+    - name: Apply configuration
+      ansible.builtin.meta: flush_handlers
+    - name: Obtain TLS certificate
+      ansible.builtin.command:
+        argv: [certbot, --nginx, --non-interactive, --agree-tos, --redirect, -m, "{{ store_email }}", -d, "{{ store_domain }}"]
+        creates: "/etc/letsencrypt/live/{{ store_domain }}/fullchain.pem"
+    - name: Enable certificate renewal
+      ansible.builtin.systemd:
+        name: certbot.timer
+        enabled: true
+        state: started
+    - name: Verify backend
+      ansible.builtin.uri:
+        url: http://127.0.0.1:8080/api/health
+        status_code: 200
+  handlers:
+    - name: Restart store
+      ansible.builtin.systemd:
+        name: africanappsstore
+        daemon_reload: true
+        state: restarted
+    - name: Reload nginx
+      ansible.builtin.command: nginx -t
+      notify: Apply nginx reload
+    - name: Apply nginx reload
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
