@@ -1,4 +1,4 @@
-import os, sqlite3, json, hashlib, secrets, hmac, time, re
+import os, sqlite3, json, hashlib, secrets, hmac, time, re, zipfile
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
@@ -36,22 +36,27 @@ class Handler(BaseHTTPRequestHandler):
     def send(self,obj,status=200,cookie=None):
         raw=json.dumps(obj).encode(); self.send_response(status); self.headers_out('application/json',len(raw))
         if cookie:self.send_header('Set-Cookie',cookie)
-        self.end_headers(); self.wfile.write(raw)
+        self.end_headers();
+        if self.command!='HEAD': self.wfile.write(raw)
     def headers_out(self,kind,length):
         self.send_header('Content-Type',kind); self.send_header('Content-Length',str(length)); self.send_header('X-Content-Type-Options','nosniff'); self.send_header('Referrer-Policy','same-origin'); self.send_header('Cache-Control','no-store')
         self.send_header('Content-Security-Policy',"default-src 'self'; style-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
+    def do_HEAD(self): self.handle_request()
     def do_GET(self): self.handle_request()
     def do_POST(self): self.handle_request()
     def handle_request(self):
         try:self.route()
         except PermissionError as e:self.send({'error':str(e)},403)
-        except (ValueError,KeyError,TypeError,json.JSONDecodeError) as e:self.send({'error':str(e)},400)
+        except (ValueError,KeyError,TypeError,AttributeError,zipfile.BadZipFile,json.JSONDecodeError) as e:self.send({'error':str(e)},400)
         except sqlite3.IntegrityError:self.send({'error':'Duplicate or invalid record'},409)
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
-        if self.command=='GET' and path in ('/','/static/app.js','/static/style.css','/static/logo.jpg'):
-            file=ROOT/({'/':'templates/index.html'}.get(path,path.lstrip('/'))); raw=file.read_bytes(); self.send_response(200); self.headers_out('text/html' if path=='/' else 'text/javascript' if path.endswith('.js') else 'image/jpeg' if path.endswith('.jpg') else 'text/css',len(raw)); self.end_headers(); self.wfile.write(raw); return
+        if self.command in ('GET','HEAD') and path in ('/','/static/app.js','/static/style.css','/static/logo.jpg'):
+            file=ROOT/({'/':'templates/index.html'}.get(path,path.lstrip('/'))); raw=file.read_bytes(); self.send_response(200); self.headers_out('text/html' if path=='/' else 'text/javascript' if path.endswith('.js') else 'image/jpeg' if path.endswith('.jpg') else 'text/css',len(raw)); self.end_headers();
+            if self.command!='HEAD': self.wfile.write(raw)
+            return
+        if self.command=='HEAD': self.send({'error':'Not found'},404); return
         with db() as c:
             cookies=dict(x.strip().split('=',1) for x in self.headers.get('Cookie','').split(';') if '=' in x)
             session=c.execute('SELECT sessions.*,users.name,users.email,users.role FROM sessions JOIN users ON users.id=user_id WHERE token=? AND expires>?',(cookies.get('session',''),time.time())).fetchone()
@@ -59,10 +64,13 @@ class Handler(BaseHTTPRequestHandler):
             body={}
             if self.command=='POST':
                 length=int(self.headers.get('Content-Length','0'))
+                if length<0: raise ValueError('Invalid content length')
                 if length>25*1024*1024: self.send({'error':'Upload limit is 25 MiB'},413); return
                 if path not in ('/api/login','/api/register') and (not session or not hmac.compare_digest(self.headers.get('X-CSRF',''),session['csrf'])): raise PermissionError('Sign in again or refresh the page')
                 raw=self.rfile.read(length)
-                if self.headers.get('Content-Type','').startswith('application/json'):body=json.loads(raw)
+                if self.headers.get('Content-Type','').startswith('application/json'):
+                    body=json.loads(raw)
+                    if not isinstance(body,dict): raise ValueError('Expected a JSON object')
             def require(role=None):
                 if not session or (role and session['role'] not in role):raise PermissionError('Access denied')
             def app(aid):
@@ -73,12 +81,14 @@ class Handler(BaseHTTPRequestHandler):
                 require()
                 if a['owner']!=uid and session['role']!='admin':raise PermissionError('Access denied')
             if path=='/api/health': self.send({'status':'ok'}); return
-            if path=='/api/me':self.send(dict(session) if session else None); return
+            if path=='/api/me':self.send({k:session[k] for k in ('user_id','name','email','role','csrf')} if session else None); return
             if path in ('/api/register','/api/login') and self.command=='POST':
                 email=str(body['email']).strip().lower(); pw=str(body['password'])
                 if path.endswith('register'):
                     if len(pw)<12 or not re.fullmatch(r'[^@\s]+@[^@\s]+\.[^@\s]+',email):raise ValueError('Valid email and password of 12+ characters required')
-                    c.execute('INSERT INTO users(email,name,password) VALUES(?,?,?)',(email,str(body['name'])[:100],password(pw)))
+                    name=str(body['name']).strip()
+                    if not name: raise ValueError('Full name is required')
+                    c.execute('INSERT INTO users(email,name,password) VALUES(?,?,?)',(email,name[:100],password(pw)))
                 u=c.execute('SELECT * FROM users WHERE email=?',(email,)).fetchone()
                 if not u or not hmac.compare_digest(password(pw,u['password'].split(':')[0]),u['password']):raise PermissionError('Invalid credentials')
                 token=secrets.token_urlsafe(32); csrf=secrets.token_urlsafe(24); c.execute('INSERT INTO sessions VALUES(?,?,?,?)',(token,u['id'],csrf,int(time.time())+86400))
@@ -104,7 +114,10 @@ class Handler(BaseHTTPRequestHandler):
                 if not re.fullmatch(r'[A-Za-z]\w*(\.[A-Za-z]\w*)+',package):raise ValueError('Invalid Android package name')
                 if body['kind'] not in ('Apps','Games','Books'):raise ValueError('Invalid content type')
                 privacy=str(body['privacy'])
-                if not privacy.startswith('https://'):raise ValueError('HTTPS privacy policy required')
+                if urlparse(privacy).scheme!='https' or not urlparse(privacy).hostname:raise ValueError('Valid HTTPS privacy policy required')
+                for key in ('name','category','description','version'):
+                    if not str(body[key]).strip(): raise ValueError(key.capitalize()+' is required')
+                if not 0<=int(body.get('age',3))<=18: raise ValueError('Minimum age must be between 0 and 18')
                 cur=c.execute('INSERT INTO apps(owner,name,package,kind,category,description,version,age,privacy,created) VALUES(?,?,?,?,?,?,?,?,?,?)',(uid,str(body['name'])[:100],package,body['kind'],str(body['category'])[:80],str(body['description'])[:20000],str(body['version'])[:50],int(body.get('age',3)),privacy,int(time.time())))
                 self.send({'id':cur.lastrowid}); return
             m=re.fullmatch(r'/api/apps/(\d+)(?:/(\w+))?',path)
@@ -112,7 +125,7 @@ class Handler(BaseHTTPRequestHandler):
                 aid=int(m[1]); action=m[2]; a=app(aid)
                 if a['status']!='published': owner(a)
                 if self.command=='GET' and not action:
-                    out=dict(a);out['reviews']=[dict(r) for r in c.execute('SELECT reviews.*,users.name FROM reviews JOIN users ON users.id=user_id WHERE app_id=?',(aid,))];out['releases']=[dict(r) for r in c.execute('SELECT * FROM releases WHERE app_id=? ORDER BY id DESC',(aid,))];self.send(out);return
+                    out=dict(a);out['reviews']=[dict(r) for r in c.execute('SELECT reviews.*,users.name FROM reviews JOIN users ON users.id=user_id WHERE app_id=?',(aid,))];out['releases']=[dict(r) for r in c.execute('SELECT id,app_id,sha256,size,created FROM releases WHERE app_id=? ORDER BY id DESC',(aid,))];self.send(out);return
                 if self.command=='GET' and action=='download':
                     require()
                     if a['status']!='published':raise PermissionError('App is not published')
