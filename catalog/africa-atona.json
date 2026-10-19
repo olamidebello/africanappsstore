@@ -11,6 +11,9 @@
   "apk_asset": "africa-atona.apk",
   "channel": "development",
   "signing": "debug",
-  "status": "source_ready_build_and_hosting_pending",
-  "description": "Community navigation beta with foreground GPS, configurable road routes, saved places and incident reports. No verified live traffic feed. 551 language/variety preferences, seven draft core-label translations; other text falls back to English. Internet and hosted platform required."
+  "status": "android_built_hosting_pending",
+  "description": "Community navigation beta with foreground GPS, configurable road routes, saved places and incident reports. No verified live traffic feed. 551 language/variety preferences, seven draft core-label translations; other text falls back to English. Internet and hosted platform required.",
+  "apk_url": "https://github.com/olamidebello/africanappsstore/releases/download/atona-beta-2/africa-atona.apk",
+  "sha256": "b3b8364596042ca86414afb17add09f9cff27282d991274a6f00dc583d1d7671",
+  "build_run": "https://github.com/olamidebello/africanappsstore/actions/runs/39337582062"
 }
