@@ -6,6 +6,7 @@ import argparse,json,re,subprocess,tarfile,tempfile,shutil,hashlib,time
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--bundle',type=Path,required=True);p.add_argument('--mapping',type=Path,required=True);args=p.parse_args()
 mapping=json.loads(args.mapping.read_text()); root=Path('/var/www/olamide-mobile')
+root.mkdir(parents=True,exist_ok=True);root.chmod(0o755)
 if not mapping: raise SystemExit('No domain-to-Nginx-include mappings configured')
 with tempfile.TemporaryDirectory() as tmp:
     stage=Path(tmp)

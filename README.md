@@ -56,3 +56,14 @@ Shared app links now load the catalog and account before opening details. Protec
 Homepage and static assets support HEAD. Invalid JSON shapes, blank registration names, invalid app metadata and malformed APK containers return validation errors. Session responses omit bearer tokens and release details omit internal file paths. Existing ownership, CSRF and moderation checks remain enforced.
 
 Validate with `python3 -m unittest discover -s tests -v` and `node --check static/app.js`. Deploy the updated checkout using the existing Ansible playbook; database and APK data remain in the persistent data directory.
+
+
+## Hosted mobile catalog and store administration
+
+Run `ansible-playbook -i localhost, -c local ansible/update-store-catalog.yml` on the hosting server after pulling this repository. This updates the **existing** `africanappsstore.service` working directory, preserving its current port, data directory and TLS proxy. Code and SQLite backups are saved under `/var/lib/olamide-store-update`. Code is restored and the service restarted if local catalog health fails. Schema changes are additive; rollback does not overwrite live user database activity.
+
+The **Hosted apps** navigation lists the 71 source-inventory website clients with their actual client features and limitations. Download links are activated only when a deployed APK and matching checksum exist under `/var/www/olamide-mobile/<domain>/`. Missing builds display “APK build pending”. APK signature/package validation happens in the build pipeline; catalog synchronization validates its local checksum. Public HTTPS availability is checked by the mobile deployment playbook. Re-run the store updater after mobile deployment to refresh listings. Successful server builds also synchronize an existing store database automatically.
+
+Existing store administrators can open **Administration** to grant/remove store administrator roles, show/hide hosted listings, close/reopen support tickets and inspect reports/audit history. All writes use the existing authenticated session, CSRF validation and SQLite backend. Role changes revoke the affected sessions, and administrators cannot remove their own access. This controls the store only; it does not grant administrator access to unrelated hosted platforms. Existing developer APK moderation remains available through its backend API.
+
+ATONA provider and super-admin provisioning is in `olamidebello/Africaatona`, `deploy/auto-provision.yml`. Other hosted products still need their own backend-specific administrator integrations; no generic cross-database dashboard is represented as completed platform control.

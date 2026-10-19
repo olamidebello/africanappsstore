@@ -25,6 +25,7 @@ def init():
         CREATE TABLE IF NOT EXISTS memberships(user_id INTEGER REFERENCES users(id),app_id INTEGER REFERENCES apps(id),kind TEXT,PRIMARY KEY(user_id,app_id,kind));
         CREATE TABLE IF NOT EXISTS settings(user_id INTEGER PRIMARY KEY REFERENCES users(id),value TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS tickets(id INTEGER PRIMARY KEY,user_id INTEGER REFERENCES users(id),subject TEXT,body TEXT,status TEXT DEFAULT 'open');
+        CREATE TABLE IF NOT EXISTS hosted_apps(domain TEXT PRIMARY KEY,metadata TEXT NOT NULL,visible INTEGER NOT NULL DEFAULT 1,updated INTEGER NOT NULL);
         CREATE TABLE IF NOT EXISTS audit(id INTEGER PRIMARY KEY,actor INTEGER,action TEXT,object_id INTEGER,created INTEGER);
         ''')
         email=os.environ.get('ADMIN_EMAIL'); pw=os.environ.get('ADMIN_PASSWORD')
@@ -80,6 +81,35 @@ class Handler(BaseHTTPRequestHandler):
             def owner(a):
                 require()
                 if a['owner']!=uid and session['role']!='admin':raise PermissionError('Access denied')
+            if path=='/api/hosted-apps' and self.command=='GET':
+                self.send([dict(json.loads(r['metadata']),visible=bool(r['visible'])) for r in c.execute('SELECT metadata,visible FROM hosted_apps WHERE visible=1 ORDER BY domain')]); return
+            if path=='/api/admin/hosted-apps':
+                require(['admin'])
+                if self.command=='POST':
+                    domain=str(body['domain']); visible=int(bool(body['visible']))
+                    if not c.execute('SELECT 1 FROM hosted_apps WHERE domain=?',(domain,)).fetchone():raise ValueError('Unknown domain')
+                    c.execute('UPDATE hosted_apps SET visible=?,updated=? WHERE domain=?',(visible,int(time.time()),domain))
+                    c.execute('INSERT INTO audit(actor,action,created) VALUES(?,?,?)',(uid,'hosted visibility '+domain+' '+str(visible),int(time.time())))
+                self.send([dict(json.loads(r['metadata']),visible=bool(r['visible'])) for r in c.execute('SELECT metadata,visible FROM hosted_apps ORDER BY domain')]);return
+            if path=='/api/admin/users':
+                require(['admin'])
+                if self.command=='POST':
+                    target=int(body['id']); role=body['role']
+                    if role not in ('user','admin'):raise ValueError('Invalid role')
+                    if target==uid and role!='admin':raise ValueError('Cannot remove your own administrator access')
+                    if not c.execute('SELECT 1 FROM users WHERE id=?',(target,)).fetchone():raise ValueError('Unknown user')
+                    c.execute('UPDATE users SET role=? WHERE id=?',(role,target))
+                    c.execute('DELETE FROM sessions WHERE user_id=?',(target,))
+                    c.execute('INSERT INTO audit(actor,action,object_id,created) VALUES(?,?,?,?)',(uid,'set role '+role,target,int(time.time())))
+                self.send([dict(r) for r in c.execute('SELECT id,email,name,role FROM users ORDER BY id LIMIT 500')]);return
+            if path=='/api/admin/tickets' and self.command=='POST':
+                require(['admin']); status=body['status']
+                if status not in ('open','closed'):raise ValueError('Invalid status')
+                target=int(body['id'])
+                if not c.execute('SELECT 1 FROM tickets WHERE id=?',(target,)).fetchone():raise ValueError('Ticket not found')
+                c.execute('UPDATE tickets SET status=? WHERE id=?',(status,target))
+                c.execute('INSERT INTO audit(actor,action,object_id,created) VALUES(?,?,?,?)',(uid,'ticket '+status,target,int(time.time())))
+                self.send({'ok':True});return
             if path=='/api/health': self.send({'status':'ok'}); return
             if path=='/api/me':self.send({k:session[k] for k in ('user_id','name','email','role','csrf')} if session else None); return
             if path in ('/api/register','/api/login') and self.command=='POST':

@@ -15,6 +15,8 @@ class StoreTest(unittest.TestCase):
   try:
    status,_,h=request('/register',{'email':'owner@example.com','password':'long-test-password','name':'Owner'});self.assertEqual(status,200)
    cookie=h['Set-Cookie'].split(';')[0];s=json.loads(request('/me',auth=(cookie,''))[1]);auth=(cookie,s['csrf'])
+   self.assertEqual(request('/admin/users',auth=auth)[0],403)
+   self.assertEqual(request('/admin/hosted-apps',{'domain':'example.com','visible':False},auth)[0],403)
    self.assertNotIn('token',s)
    self.assertNotIn('expires',s)
    self.assertEqual(request('/register',{'email':'blank@example.com','password':'long-test-password','name':'   '})[0],400)
@@ -35,6 +37,13 @@ class StoreTest(unittest.TestCase):
    self.assertEqual(request(p+'/download',auth=auth)[1],buf.getvalue())
    self.assertEqual(request(p+'/review',{'rating':5,'body':'Good'},auth)[0],200)
    self.assertEqual(request(p+'/review',{'rating':9,'body':'Bad'},auth)[0],409)
+   users=json.loads(request('/admin/users',auth=auth)[1]);self.assertTrue(users);self.assertNotIn('password',users[0])
+   self.assertEqual(request('/admin/users',{'id':s['user_id'],'role':'user'},auth)[0],400)
+   with app.db() as c:
+    c.execute('INSERT OR REPLACE INTO hosted_apps(domain,metadata,updated) VALUES(?,?,?)',('example.com',json.dumps({'name':'Example','domain':'example.com'}),1))
+   self.assertEqual(len(json.loads(request('/hosted-apps')[1])),1)
+   self.assertEqual(request('/admin/hosted-apps',{'domain':'example.com','visible':False},auth)[0],200)
+   self.assertEqual(json.loads(request('/hosted-apps')[1]),[])
    self.assertEqual(request('/admin')[0],403)
    self.assertEqual(request('/settings',{'country':'Nigeria'},auth)[0],200)
    self.assertEqual(json.loads(request('/settings',auth=auth)[1])['country'],'Nigeria')

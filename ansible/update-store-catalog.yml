@@ -1,0 +1,29 @@
+---
+- name: Update existing Africa Apps Store and hosted mobile catalog
+  hosts: all
+  become: true
+  vars:
+    store_update_source: /opt/olamide-store-update/source
+  tasks:
+    - name: Pull store updates preserving local edits
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africanappsstore.git
+        dest: '{{ store_update_source }}'
+        version: main
+        force: false
+    - name: Update existing service and database with backups
+      ansible.builtin.command:
+        argv: [python3, '{{ store_update_source }}/tools/update_store.py']
+      register: store_update
+      changed_when: "'UPDATED' in store_update.stdout"
+    - name: Verify public hosted app catalog
+      ansible.builtin.uri:
+        url: https://africanappsstore.space/api/hosted-apps
+        validate_certs: true
+        status_code: 200
+        return_content: true
+      register: catalog
+      failed_when: catalog.status != 200 or catalog.json | length == 0
+    - name: Report administration and catalog location
+      ansible.builtin.debug:
+        msg: 'Catalog: https://africanappsstore.space/#Hosted%20apps — existing store administrators can open Administration after signing in.'

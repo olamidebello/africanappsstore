@@ -69,6 +69,10 @@ def main():
         run([gradle,'-p',ROOT,':app:assembleDebug','--no-daemon','--max-workers=2'],env=env)
         run(['python3',ROOT/'tools/package.py'],env=env)
         run(['python3',ROOT/'tools/deploy.py','--bundle',ROOT/'dist/hosted-app-websites.tar.gz','--mapping',args.mapping])
+        store_db=Path('/var/lib/africanappsstore/store.sqlite3')
+        sync=ROOT.parents[1]/'tools/sync_hosted_catalog.py'
+        if store_db.is_file() and sync.is_file():
+            run(['python3',sync,'--database',store_db,'--manifest',ROOT/'apps.json'])
         marker.write_text(json.dumps(dict(identity=identity,commit=commit,version=version,deployed_at=int(time.time()))))
         print('DEPLOYED: verified APKs and domain download pages installed')
 if __name__=='__main__': main()
