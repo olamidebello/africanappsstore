@@ -2,7 +2,7 @@
 """Install verified download pages via explicit Nginx server include mapping.
 Run on hosting server; no guessing document roots or replacing virtual hosts.
 """
-import argparse,json,re,subprocess,tarfile,tempfile,shutil,hashlib
+import argparse,json,re,subprocess,tarfile,tempfile,shutil,hashlib,time
 from pathlib import Path
 p=argparse.ArgumentParser();p.add_argument('--bundle',type=Path,required=True);p.add_argument('--mapping',type=Path,required=True);args=p.parse_args()
 mapping=json.loads(args.mapping.read_text()); root=Path('/var/www/olamide-mobile')
@@ -31,8 +31,7 @@ with tempfile.TemporaryDirectory() as tmp:
     try:
         for src,dest,include,before in planned:
             dest.parent.mkdir(parents=True,exist_ok=True)
-            backup=dest.with_name(dest.name+'.previous')
-            if backup.exists(): raise ValueError('Previous backup exists; review it first: '+str(backup))
+            backup=dest.with_name(dest.name+'.previous-'+str(time.time_ns()))
             if dest.exists(): dest.rename(backup)
             changed.append((dest,backup,include,before))
             shutil.copytree(src,dest)

@@ -1,0 +1,88 @@
+---
+- name: Pull build and deploy Olamidepanel Android website clients
+  hosts: all
+  become: true
+  gather_facts: true
+  vars:
+    mobile_source: /opt/olamide-hosted-mobile/source
+    mobile_state: /var/lib/olamide-hosted-mobile
+    mobile_branch: main
+    mobile_domain_includes: {}
+    mobile_verify_https: true
+    mobile_force_build: false
+  tasks:
+    - name: Require supported server and explicit Nginx mappings
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.os_family == 'Debian'
+          - ansible_facts.architecture == 'x86_64'
+          - mobile_domain_includes is mapping
+          - mobile_domain_includes | length > 0
+          - not ansible_check_mode
+        fail_msg: Use a Debian amd64 server and provide mobile_domain_includes from hosted-mobile.example.yml. Use --syntax-check for validation.
+    - name: Install build and hosting prerequisites
+      ansible.builtin.apt:
+        name: [git, python3, openjdk-17-jdk-headless, unzip, ca-certificates, nginx]
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+    - name: Validate existing website configuration before any changes
+      ansible.builtin.command: nginx -t
+      changed_when: false
+    - name: Create private persistent signing and build directory
+      ansible.builtin.file:
+        path: '{{ mobile_state }}'
+        state: directory
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Pull current application source without discarding local edits
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africanappsstore.git
+        dest: '{{ mobile_source }}'
+        version: '{{ mobile_branch }}'
+        update: true
+        force: false
+      register: mobile_checkout
+    - name: Save explicit website mappings
+      ansible.builtin.copy:
+        dest: '{{ mobile_state }}/domains.json'
+        content: '{{ mobile_domain_includes | to_nice_json }}'
+        mode: '0600'
+      register: mobile_mapping
+    - name: Build signed APKs and install downloads with a deployment lock
+      ansible.builtin.command:
+        argv:
+          - python3
+          - '{{ mobile_source }}/mobile/fleet/tools/server_build.py'
+          - --state
+          - '{{ mobile_state }}'
+          - --mapping
+          - '{{ mobile_state }}/domains.json'
+          - '{{ "--force" if mobile_force_build | bool else "--incremental" }}'
+      async: 10800
+      poll: 15
+      register: mobile_deployment
+      changed_when: "'DEPLOYED' in mobile_deployment.stdout"
+    - name: Verify each public HTTPS download page
+      ansible.builtin.uri:
+        url: 'https://{{ item.key }}/mobile-app/'
+        status_code: 200
+        validate_certs: true
+        return_content: true
+      loop: '{{ mobile_domain_includes | dict2items }}'
+      register: mobile_pages
+      failed_when: mobile_pages.status != 200 or 'Download Android APK' not in mobile_pages.content
+      when: mobile_verify_https | bool
+    - name: Verify public APK endpoints
+      ansible.builtin.uri:
+        url: 'https://{{ item.key }}/mobile-app/{{ item.key | replace(".", "-") }}.apk'
+        method: HEAD
+        status_code: 200
+        validate_certs: true
+      loop: '{{ mobile_domain_includes | dict2items }}'
+      when: mobile_verify_https | bool
+    - name: Report installed website downloads
+      ansible.builtin.debug:
+        msg: 'Android download: https://{{ item.key }}/download-app — back up {{ mobile_state }}/signing before rebuilding this server.'
+      loop: '{{ mobile_domain_includes | dict2items }}'

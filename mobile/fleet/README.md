@@ -33,4 +33,22 @@ Run (Python 3.9+):
 sudo python3 mobile/fleet/tools/deploy.py --bundle hosted-app-websites.tar.gz --mapping /root/mobile-app-domains.json
 ```
 
-The installer validates archive paths, APK presence/checksums and dedicated include ownership, keeps one `.previous` backup, tests Nginx and rolls back failed changes. Review/remove the previous backup before the next installation. It does not discover server blocks or rewrite site source. Add a **Download Android app** link to `/download-app` in each platform's navigation. Its landing page, APK and checksum are served by that same domain under `/mobile-app/`. Verify every public HTTPS link and APK before advertising availability. This repository update alone does not deploy to the hosting server.
+The installer validates archive paths, APK presence/checksums and dedicated include ownership, keeps timestamped `.previous-*` backups, tests Nginx and rolls back failed changes. Backups are preserved for operator review. It does not discover server blocks or rewrite site source. Add a **Download Android app** link to `/download-app` in each platform's navigation. Its landing page, APK and checksum are served by that same domain under `/mobile-app/`. Verify every public HTTPS link and APK before advertising availability. This repository update alone does not deploy to the hosting server.
+
+
+## Automatic server pull, build and deployment with Ansible
+
+The server can build all 71 APKs itself without GitHub signing secrets. A persistent signing key and password are generated once under `/var/lib/olamide-hosted-mobile/signing` with root-only access. Back up this directory securely: losing it prevents compatible app updates. This channel uses a different key from GitHub builds unless the same keystore is deliberately configured in both places.
+
+First reference dedicated, initially empty Nginx include files inside each mapped domain’s existing HTTPS server block. Example: `include /etc/nginx/mobile-apps/africanappsstore.space.conf;`. Create the directory and empty files first; validate `nginx -t`. The playbook does not guess which existing virtual host serves a domain or alter website source. Copy `ansible/hosted-mobile.example.yml` to `/root/hosted-mobile.yml` and fill in every confirmed domain and its include path.
+
+Run on the hosting server (Debian amd64, root, outbound APT/Google/Gradle/GitHub access):
+
+```bash
+apt-get update
+apt-get install -y ansible-core git
+git clone https://github.com/olamidebello/africanappsstore.git /opt/africanappsstore-deployer
+ansible-playbook -i localhost, -c local /opt/africanappsstore-deployer/ansible/deploy-hosted-mobile-apps.yml -e @/root/hosted-mobile.yml
+```
+
+Repeat the final command to pull and deploy new commits. The playbook pulls `main` into `/opt/olamide-hosted-mobile/source`, installs Java/SDK/Gradle, builds with a monotonic version code, verifies all packages and signatures, deploys the mapped downloads, and checks their public HTTPS pages and APK endpoints. It skips rebuilding an already installed source commit and mapping. Use `-e mobile_force_build=true` to repair missing deployed files. Allow substantial RAM, disk space and time for the initial Android SDK download and 71 builds. Existing website navigation still needs a link to `/download-app`. APKs are hosted locally; this playbook does not upload binaries to GitHub Releases.
