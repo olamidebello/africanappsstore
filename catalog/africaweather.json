@@ -1,0 +1,16 @@
+{
+  "name": "Africa Weather",
+  "package": "world.africandroid.africaweather",
+  "category": "Weather",
+  "platform": "Android",
+  "min_android": "6.0",
+  "country_destinations": 55,
+  "website": "https://africaweather.africandroid.world/",
+  "privacy": "https://africaweather.africandroid.world/privacy.html",
+  "source": "https://github.com/olamidebello/africanappsstore/tree/main/mobile/africaweather",
+  "releases": "https://github.com/olamidebello/africanappsstore/releases",
+  "apk_asset": "AfricaWeather.apk",
+  "channel": "development",
+  "signing": "debug",
+  "description": "Current conditions and seven-day featured-city forecasts across 54 African countries and Western Sahara. Select and remember a preferred country, switch country editions, and explore the Africa directory. Internet required."
+}
