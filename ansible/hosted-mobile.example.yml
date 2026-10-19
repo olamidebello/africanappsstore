@@ -1,6 +1,6 @@
-# Reference these dedicated files INSIDE the corresponding existing Nginx
-# HTTPS server blocks before running. Create them empty; do not reuse an
-# existing website config file. Add every confirmed hosted domain here.
+# The playbook creates these dedicated include files and attaches each to
+# the exact active HTTPS server block. Existing HTTPS websites are required.
+# Add every confirmed hosted domain here; never use an existing vhost file.
 mobile_domain_includes:
   africanappsstore.space: /etc/nginx/mobile-apps/africanappsstore.space.conf
   africaweather.africandroid.world: /etc/nginx/mobile-apps/africaweather.africandroid.world.conf

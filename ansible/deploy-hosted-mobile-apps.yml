@@ -50,6 +50,17 @@
         content: '{{ mobile_domain_includes | to_nice_json }}'
         mode: '0600'
       register: mobile_mapping
+    - name: Create and attach dedicated download includes to existing HTTPS websites
+      ansible.builtin.command:
+        argv:
+          - python3
+          - '{{ mobile_source }}/mobile/fleet/tools/configure_nginx.py'
+          - --mapping
+          - '{{ mobile_state }}/domains.json'
+          - --state
+          - '{{ mobile_state }}'
+      register: mobile_nginx
+      changed_when: "'CONFIGURED' in mobile_nginx.stdout"
     - name: Build signed APKs and install downloads with a deployment lock
       ansible.builtin.command:
         argv:

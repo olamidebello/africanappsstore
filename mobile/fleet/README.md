@@ -40,7 +40,7 @@ The installer validates archive paths, APK presence/checksums and dedicated incl
 
 The server can build all 71 APKs itself without GitHub signing secrets. A persistent signing key and password are generated once under `/var/lib/olamide-hosted-mobile/signing` with root-only access. Back up this directory securely: losing it prevents compatible app updates. This channel uses a different key from GitHub builds unless the same keystore is deliberately configured in both places.
 
-First reference dedicated, initially empty Nginx include files inside each mapped domain’s existing HTTPS server block. Example: `include /etc/nginx/mobile-apps/africanappsstore.space.conf;`. Create the directory and empty files first; validate `nginx -t`. The playbook does not guess which existing virtual host serves a domain or alter website source. Copy `ansible/hosted-mobile.example.yml` to `/root/hosted-mobile.yml` and fill in every confirmed domain and its include path.
+Copy `ansible/hosted-mobile.example.yml` to `/root/hosted-mobile.yml` and fill in each confirmed domain and its dedicated `/etc/nginx/mobile-apps/domain.conf` include path. The playbook now creates missing includes automatically and attaches them to the exact active HTTPS server blocks discovered from `nginx -T`. It preserves proxy, application and TLS directives, backs up edited files, validates Nginx and rolls back failed edits. Missing or ambiguous HTTPS hosts and multiple domain apps sharing one server block are reported before changes. Provision or split those website configurations first. Website navigation still needs a link to `/download-app`.
 
 Run on the hosting server (Debian amd64, root, outbound APT/Google/Gradle/GitHub access):
 
