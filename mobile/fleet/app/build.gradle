@@ -1,0 +1,31 @@
+import groovy.json.JsonSlurper
+plugins { id 'com.android.application' }
+def apps = new JsonSlurper().parse(rootProject.file('apps.json'))
+android {
+ namespace 'world.africandroid.client'
+ compileSdk 35
+ defaultConfig { minSdk 26; targetSdk 35; versionCode Integer.parseInt(System.getenv('APP_VERSION_CODE') ?: '1'); versionName '0.1.' + (System.getenv('APP_VERSION_CODE') ?: '1') }
+ signingConfigs {
+  development {
+   storeFile file(System.getenv('FLEET_KEYSTORE') ?: System.getProperty('user.home') + '/.android/debug.keystore')
+   storePassword System.getenv('FLEET_KEY_PASSWORD') ?: 'android'
+   keyAlias System.getenv('FLEET_KEY_ALIAS') ?: 'androiddebugkey'
+   keyPassword System.getenv('FLEET_KEY_PASSWORD') ?: 'android'
+  }
+ }
+ buildTypes { debug { signingConfig signingConfigs.development } }
+ flavorDimensions += 'site'
+ productFlavors {
+  apps.each { site ->
+   create(site.id) {
+    dimension 'site'
+    applicationId site.package
+    resValue 'string', 'app_name', site.name
+    buildConfigField 'String', 'HOME_URL', groovy.json.JsonOutput.toJson(site.url)
+    buildConfigField 'String', 'HOME_HOST', groovy.json.JsonOutput.toJson(site.domain)
+   }
+  }
+ }
+ buildFeatures { buildConfig true }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
