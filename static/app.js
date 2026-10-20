@@ -31,7 +31,7 @@ window.onhashchange=()=>{if($('#modal').open)$('#modal').close();route()};route(
 
 async function hostedCards(){
  const apps=await api('/hosted-apps'),q=$('#query').value.toLowerCase();
- $('#content').innerHTML=apps.filter(a=>(a.name+' '+a.description+' '+a.domain).toLowerCase().includes(q)).map(a=>`<article>${a.domain==='jobs.africandroid.world'?'<img src="/downloads/africa-jobs-logo.png" alt="Africa Jobs" width="220">':''}<h3>${esc(a.name)}</h3><p>${esc(a.domain)}</p><p>${esc(a.description)}</p><ul>${a.features.map(f=>`<li>${esc(f)}</li>`).join('')}</ul><p>${esc(a.limitations)}</p><p>Android 8+ · Development edition</p>${a.apk_url?`<a class="button" href="${esc(a.apk_url)}">Download APK</a><p><small>SHA-256: ${esc(a.sha256)}</small></p>`:'<p>APK build pending</p>'}<a href="${esc(a.website)}" target="_blank" rel="noopener">Open website</a></article>`).join('')||'<p>No hosted apps match this search.</p>';
+ $('#content').innerHTML=apps.filter(a=>(a.name+' '+a.description+' '+a.domain).toLowerCase().includes(q)).map(a=>`<article>${a.domain==='afribulkhub.com'?'<img src="/downloads/africa-bulk-hub-logo.png" alt="Africa Bulk Hub" width="220">':''}${a.domain==='jobs.africandroid.world'?'<img src="/downloads/africa-jobs-logo.png" alt="Africa Jobs" width="220">':''}<h3>${esc(a.name)}</h3><p>${esc(a.domain)}</p><p>${esc(a.description)}</p><ul>${a.features.map(f=>`<li>${esc(f)}</li>`).join('')}</ul><p>${esc(a.limitations)}</p><p>Android 8+ · ${a.domain==='afribulkhub.com'?'Direct APK':'Development edition'}</p>${a.apk_url?`<a class="button" href="${esc(a.apk_url)}">Download APK</a><p><small>SHA-256: ${esc(a.sha256)}</small></p>`:'<p>APK build pending</p>'}<a href="${esc(a.website)}" target="_blank" rel="noopener">Open website</a></article>`).join('')||'<p>No hosted apps match this search.</p>';
 }
 async function adminDashboard(){
  const [users,hosted,info]=await Promise.all([api('/admin/users'),api('/admin/hosted-apps'),api('/admin')]);
@@ -42,4 +42,5 @@ async function adminDashboard(){
  document.querySelectorAll('[data-domain]').forEach(b=>b.onclick=async()=>{try{await api('/admin/hosted-apps',{domain:b.dataset.domain,visible:b.dataset.visible==='1'});await adminDashboard()}catch(e){notice(e.message)}});
  document.querySelectorAll('[data-ticket]').forEach(b=>b.onclick=async()=>{try{await api('/admin/tickets',{id:Number(b.dataset.ticket),status:b.dataset.status});await adminDashboard()}catch(e){notice(e.message)}});
 }
+
 

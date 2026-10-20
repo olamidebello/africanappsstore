@@ -53,6 +53,16 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
+        hub_downloads={'/downloads/africa-bulk-hub.apk':'africa-bulk-hub.apk','/downloads/africa-bulk-hub.apk.sha256':'africa-bulk-hub.apk.sha256','/downloads/africa-bulk-hub-logo.png':'logo.png','/downloads/africa-bulk-hub-banner.png':'banner.png','/downloads/africa-bulk-hub-release.json':'release.json'}
+        if self.command in ('GET','HEAD') and path in hub_downloads:
+            file=ROOT/'static/afribulkhub'/hub_downloads[path]
+            if not file.is_file():self.send({'error':'Africa Bulk Hub download not installed'},404);return
+            raw=file.read_bytes();kind='application/vnd.android.package-archive' if path.endswith('.apk') else 'image/png' if path.endswith('.png') else 'application/json' if path.endswith('.json') else 'text/plain'
+            self.send_response(200);self.headers_out(kind,len(raw))
+            if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="africa-bulk-hub.apk"')
+            self.end_headers()
+            if self.command!='HEAD':self.wfile.write(raw)
+            return
         if self.command in ('GET','HEAD') and path in ('/downloads/africa-jobs.apk','/downloads/africa-jobs.apk.sha256','/downloads/africa-jobs-logo.png'):
             file=ROOT/'static/africajobs'/path.split('/')[-1]
             if not file.is_file(): self.send({'error':'Africa Jobs download not installed'},404); return
@@ -217,4 +227,5 @@ class Handler(BaseHTTPRequestHandler):
             self.send({'error':'Not found'},404)
 if __name__=='__main__':
     init(); ThreadingHTTPServer((os.environ.get('BIND','127.0.0.1'),int(os.environ.get('PORT','8080'))),Handler).serve_forever()
+
 

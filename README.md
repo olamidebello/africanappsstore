@@ -97,3 +97,12 @@ ansible-playbook -i localhost, -c local ansible/deploy-africajobs-mobile.yml
 The playbook updates the current service using its existing backup mechanism, checks the APK checksum, adds the Africa Jobs Hosted apps listing, and verifies HTTPS. Website link: `https://africanappsstore.space/#Hosted%20apps`. APK route: `/downloads/africa-jobs.apk`. The site is not changed until the playbook runs on the hosting server. The current database default is `/var/lib/africanappsstore/store.sqlite3`; deployments using another database must pass the matching path to the listing installer.
 
 The initial APK is a development build. Its signing identity must be preserved for compatible updates; rebuilding with a new key requires uninstalling the older app. Use a persistent private production keystore for a production release. No production signing key is committed.
+
+## Africa Bulk Hub Android release
+
+`catalog/afribulkhub.json` and `static/afribulkhub/` contain the signed Africa Bulk Hub 1.0.0 website-client APK, checksum, generated logo/banner and release metadata. Package `com.afribulkhub.mobile`, Android 8+. Slogan: **Connecting Africa. Trading Beyond.** No private signing key is in this repository.
+
+On the existing hosting server, pull this source and run `ansible-playbook -i localhost, -c local ansible/deploy-afribulkhub-mobile.yml`. It uses the existing store backup/update mechanism, installs a checksum-verified Hosted apps listing while preserving its visibility setting, and verifies the public download and catalog. Source publication alone does not deploy the live website. The app needs internet and the operational afribulkhub.com site; no offline trading, native push or live payment processing is included. Blob-based downloads may need the native Browser control. Android device acceptance testing remains outstanding.
+
+Public paths after deployment: `/downloads/africa-bulk-hub.apk`, `/downloads/africa-bulk-hub.apk.sha256`, `/downloads/africa-bulk-hub-logo.png`, `/downloads/africa-bulk-hub-banner.png`, and `/downloads/africa-bulk-hub-release.json`. The listing appears under **Hosted apps**. Two integration tests cover public APK/logo HEAD/download behavior and preservation of other catalog records and visibility.
+
