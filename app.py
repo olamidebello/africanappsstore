@@ -53,8 +53,8 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
-        if self.command in ('GET','HEAD') and path in ('/','/static/app.js','/static/style.css','/static/logo.jpg'):
-            file=ROOT/({'/':'templates/index.html'}.get(path,path.lstrip('/'))); raw=file.read_bytes(); self.send_response(200); self.headers_out('text/html' if path=='/' else 'text/javascript' if path.endswith('.js') else 'image/jpeg' if path.endswith('.jpg') else 'text/css',len(raw)); self.end_headers();
+        if self.command in ('GET','HEAD') and path in ('/','/copyright','/terms','/privacy','/static/app.js','/static/style.css','/static/logo.jpg'):
+            file=ROOT/({'/':'templates/index.html','/copyright':'templates/copyright.html','/terms':'templates/terms.html','/privacy':'templates/privacy.html'}.get(path,path.lstrip('/'))); raw=file.read_bytes(); self.send_response(200); self.headers_out('text/html' if path in ('/','/copyright','/terms','/privacy') else 'text/javascript' if path.endswith('.js') else 'image/jpeg' if path.endswith('.jpg') else 'text/css',len(raw)); self.end_headers();
             if self.command!='HEAD': self.wfile.write(raw)
             return
         if self.command=='HEAD': self.send({'error':'Not found'},404); return
@@ -208,3 +208,4 @@ class Handler(BaseHTTPRequestHandler):
             self.send({'error':'Not found'},404)
 if __name__=='__main__':
     init(); ThreadingHTTPServer((os.environ.get('BIND','127.0.0.1'),int(os.environ.get('PORT','8080'))),Handler).serve_forever()
+
