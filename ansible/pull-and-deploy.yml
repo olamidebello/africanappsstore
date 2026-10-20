@@ -1,0 +1,43 @@
+---
+- name: Pull and deploy updates to the existing Africa Apps Store
+  hosts: all
+  become: true
+  vars:
+    store_update_source: /opt/olamide-store-update/source
+    store_update_version: main
+    store_public_url: https://africanappsstore.space
+  tasks:
+    - name: Install Git and Python prerequisites
+      ansible.builtin.apt:
+        name: [git, python3]
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+    - name: Pull store source without discarding local changes
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africanappsstore.git
+        dest: '{{ store_update_source }}'
+        version: '{{ store_update_version }}'
+        force: false
+      register: store_source
+    - name: Deploy code with backups and local health checks
+      ansible.builtin.command:
+        argv: [python3, '{{ store_update_source }}/tools/update_store.py']
+      register: store_update
+      changed_when: "'UPDATED' in store_update.stdout"
+    - name: Check public homepage and legal pages with trusted HTTPS
+      ansible.builtin.uri:
+        url: '{{ store_public_url }}{{ item.path }}'
+        validate_certs: true
+        status_code: 200
+        return_content: true
+      loop:
+        - {path: '/', marker: 'Terms and Conditions'}
+        - {path: '/copyright', marker: 'Copyright'}
+        - {path: '/terms', marker: 'Terms and Conditions'}
+        - {path: '/privacy', marker: 'Privacy Policy'}
+      register: store_page
+      failed_when: store_page.status != 200 or item.marker not in store_page.content
+    - name: Report deployed version
+      ansible.builtin.debug:
+        msg: 'Deployed {{ store_source.after }} to {{ store_public_url }}; copyright, terms and privacy pages verified.'

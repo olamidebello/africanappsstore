@@ -67,3 +67,17 @@ The **Hosted apps** navigation lists the 71 source-inventory website clients wit
 Existing store administrators can open **Administration** to grant/remove store administrator roles, show/hide hosted listings, close/reopen support tickets and inspect reports/audit history. All writes use the existing authenticated session, CSRF validation and SQLite backend. Role changes revoke the affected sessions, and administrators cannot remove their own access. This controls the store only; it does not grant administrator access to unrelated hosted platforms. Existing developer APK moderation remains available through its backend API.
 
 ATONA provider and super-admin provisioning is in `olamidebello/Africaatona`, `deploy/auto-provision.yml`. Other hosted products still need their own backend-specific administrator integrations; no generic cross-database dashboard is represented as completed platform control.
+
+## Pull and deploy updates (existing server)
+
+On the hosting server, run:
+
+```bash
+sudo apt-get update && sudo apt-get install -y git ansible
+sudo mkdir -p /opt/olamide-store-deployer
+sudo git -C /opt/olamide-store-deployer rev-parse --git-dir >/dev/null 2>&1 || sudo git clone https://github.com/olamidebello/africanappsstore.git /opt/olamide-store-deployer
+sudo git -C /opt/olamide-store-deployer pull --ff-only
+sudo ansible-playbook -i localhost, -c local /opt/olamide-store-deployer/ansible/pull-and-deploy.yml
+```
+
+This playbook updates an already installed `africanappsstore.service`. It discovers the existing service working directory, data path and port, preserves its configuration and TLS, backs up SQLite and replaced code, deploys Python/static/template files, synchronizes the hosted catalog, restarts the service and checks local catalog and legal routes. Local deployment failures restore changed code (including removal of newly added files); the live database is not overwritten during rollback. Public HTTPS failures stop the playbook for investigation after deployment. Existing source checkout edits are not discarded. The existing catalog updater now also includes templates and styles. No administrator password is required for an update.
