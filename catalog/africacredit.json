@@ -4,15 +4,16 @@
   "category": "Finance",
   "platform": "Android",
   "min_android": "8.0",
-  "website": null,
-  "requested_website": "https://jobs.africandroid.world/",
-  "status": "domain_conflict_build_pending",
+  "website": "https://credit.africandroid.world/",
+  "requested_website": "https://credit.africandroid.world/",
+  "status": "deployment_build_pending",
   "channel": "development",
-  "description": "Africa Credit — Know your credit. Grow your future. Initial financial education and service-request website client. Requested domain currently serves Africa Jobs; do not enable download until a dedicated Africa Credit deployment, APK and checksum are verified.",
+  "description": "Africa Credit — Know your credit. Grow your future. Financial education and service-request website client. Enable download only after the Africa Credit deployment, APK and checksum are verified.",
   "source": "https://github.com/olamidebello/Africa-Credit",
   "apk_url": null,
   "sha256": null,
   "version": "1.0.0",
   "version_code": 1,
-  "signing": "Production signing not configured"
+  "signing": "Production signing not configured",
+  "privacy": "https://credit.africandroid.world/privacy.html"
 }
