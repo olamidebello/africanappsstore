@@ -53,6 +53,15 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
+        if self.command in ('GET','HEAD') and path in ('/downloads/africa-jobs.apk','/downloads/africa-jobs.apk.sha256','/downloads/africa-jobs-logo.png'):
+            file=ROOT/'static/africajobs'/path.split('/')[-1]
+            if not file.is_file(): self.send({'error':'Africa Jobs download not installed'},404); return
+            kind='application/vnd.android.package-archive' if path.endswith('.apk') else 'image/png' if path.endswith('.png') else 'text/plain'
+            raw=file.read_bytes(); self.send_response(200); self.headers_out(kind,len(raw))
+            if path.endswith('.apk'): self.send_header('Content-Disposition','attachment; filename="africa-jobs.apk"')
+            self.end_headers()
+            if self.command!='HEAD': self.wfile.write(raw)
+            return
         if self.command in ('GET','HEAD') and path in ('/','/copyright','/terms','/privacy','/static/app.js','/static/style.css','/static/logo.jpg'):
             file=ROOT/({'/':'templates/index.html','/copyright':'templates/copyright.html','/terms':'templates/terms.html','/privacy':'templates/privacy.html'}.get(path,path.lstrip('/'))); raw=file.read_bytes(); self.send_response(200); self.headers_out('text/html' if path in ('/','/copyright','/terms','/privacy') else 'text/javascript' if path.endswith('.js') else 'image/jpeg' if path.endswith('.jpg') else 'text/css',len(raw)); self.end_headers();
             if self.command!='HEAD': self.wfile.write(raw)

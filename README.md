@@ -81,3 +81,19 @@ sudo ansible-playbook -i localhost, -c local /opt/olamide-store-deployer/ansible
 ```
 
 This playbook updates an already installed `africanappsstore.service`. It discovers the existing service working directory, data path and port, preserves its configuration and TLS, backs up SQLite and replaced code, deploys Python/static/template files, synchronizes the hosted catalog, restarts the service and checks local catalog and legal routes. Local deployment failures restore changed code (including removal of newly added files); the live database is not overwritten during rollback. Public HTTPS failures stop the playbook for investigation after deployment. Existing source checkout edits are not discarded. The existing catalog updater now also includes templates and styles. No administrator password is required for an update.
+
+## Africa Jobs Android client and store download
+
+`mobile/africajobs` contains the Africa Jobs HTTPS Android website client, approved logo, and a dependency-light SDK build script. `catalog/africajobs.json` records its verified build metadata. `static/africajobs` contains the development APK, checksum and logo after a successful build. This is an Android website client, not a native implementation of every marketplace feature.
+
+To publish the checked-in APK and listing on the existing store server:
+
+```sh
+cd /opt/africanappsstore-deployer
+git pull --ff-only origin main
+ansible-playbook -i localhost, -c local ansible/deploy-africajobs-mobile.yml
+```
+
+The playbook updates the current service using its existing backup mechanism, checks the APK checksum, adds the Africa Jobs Hosted apps listing, and verifies HTTPS. Website link: `https://africanappsstore.space/#Hosted%20apps`. APK route: `/downloads/africa-jobs.apk`. The site is not changed until the playbook runs on the hosting server. The current database default is `/var/lib/africanappsstore/store.sqlite3`; deployments using another database must pass the matching path to the listing installer.
+
+The initial APK is a development build. Its signing identity must be preserved for compatible updates; rebuilding with a new key requires uninstalling the older app. Use a persistent private production keystore for a production release. No production signing key is committed.

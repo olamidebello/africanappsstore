@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 inventory.ini
 .env
+
+mobile/africajobs/build/
+mobile/africajobs/dist/
+*.jks

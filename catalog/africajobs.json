@@ -1,0 +1,17 @@
+{
+  "name": "Africa Jobs",
+  "package": "world.africandroid.africajobs",
+  "category": "Business",
+  "platform": "Android",
+  "min_android": "8.0",
+  "website": "https://jobs.africandroid.world/",
+  "privacy": "https://jobs.africandroid.world/privacy",
+  "channel": "development",
+  "status": "built_hosting_pending",
+  "description": "Africa Jobs dedicated HTTPS website client. Connecting Talent. Building Africa. Internet and an operational Africa Jobs website required. Use Browser for uploads, downloads and unsupported flows. No native push notifications or offline work.",
+  "version": "0.1.0",
+  "version_code": 1,
+  "apk_url": "https://africanappsstore.space/downloads/africa-jobs.apk",
+  "sha256": "3f5f2dba409ed8a2300a590e6576ce76d30048a721f6e82ed5b37ecdb9a7a457",
+  "signing": "development key; production key not configured"
+}

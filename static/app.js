@@ -31,7 +31,7 @@ window.onhashchange=()=>{if($('#modal').open)$('#modal').close();route()};route(
 
 async function hostedCards(){
  const apps=await api('/hosted-apps'),q=$('#query').value.toLowerCase();
- $('#content').innerHTML=apps.filter(a=>(a.name+' '+a.description+' '+a.domain).toLowerCase().includes(q)).map(a=>`<article><h3>${esc(a.name)}</h3><p>${esc(a.domain)}</p><p>${esc(a.description)}</p><ul>${a.features.map(f=>`<li>${esc(f)}</li>`).join('')}</ul><p>${esc(a.limitations)}</p><p>Android 8+ · Development edition</p>${a.apk_url?`<a class="button" href="${esc(a.apk_url)}">Download APK</a><p><small>SHA-256: ${esc(a.sha256)}</small></p>`:'<p>APK build pending</p>'}<a href="${esc(a.website)}" target="_blank" rel="noopener">Open website</a></article>`).join('')||'<p>No hosted apps match this search.</p>';
+ $('#content').innerHTML=apps.filter(a=>(a.name+' '+a.description+' '+a.domain).toLowerCase().includes(q)).map(a=>`<article>${a.domain==='jobs.africandroid.world'?'<img src="/downloads/africa-jobs-logo.png" alt="Africa Jobs" width="220">':''}<h3>${esc(a.name)}</h3><p>${esc(a.domain)}</p><p>${esc(a.description)}</p><ul>${a.features.map(f=>`<li>${esc(f)}</li>`).join('')}</ul><p>${esc(a.limitations)}</p><p>Android 8+ · Development edition</p>${a.apk_url?`<a class="button" href="${esc(a.apk_url)}">Download APK</a><p><small>SHA-256: ${esc(a.sha256)}</small></p>`:'<p>APK build pending</p>'}<a href="${esc(a.website)}" target="_blank" rel="noopener">Open website</a></article>`).join('')||'<p>No hosted apps match this search.</p>';
 }
 async function adminDashboard(){
  const [users,hosted,info]=await Promise.all([api('/admin/users'),api('/admin/hosted-apps'),api('/admin')]);
