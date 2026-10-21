@@ -16,6 +16,11 @@ def synchronize(db,manifest,downloads):
         rows.append((domain,json.dumps(dict(domain=domain,name=app['name'],category=app['category'],package=app['package'],website=app['url'],description=f"{app['name']} Android website client for {domain}. Access the platform’s existing web experience in a dedicated app.",features=FEATURES,limitations='Internet required. Native calls, background navigation, camera, microphone, file uploads and offline operation are not implemented. Use Browser for unsupported flows.',apk_url='https://'+domain+'/mobile-app/'+slug+'.apk' if ready else None,sha256=digest,download_status='available' if ready else 'build_pending')),int(time.time())))
     with sqlite3.connect(db) as c:
         c.execute('CREATE TABLE IF NOT EXISTS hosted_apps(domain TEXT PRIMARY KEY,metadata TEXT NOT NULL,visible INTEGER NOT NULL DEFAULT 1,updated INTEGER NOT NULL)')
+        # A verified Chromium release replaces the generic website client for
+        # this domain. Routine fleet sync must not downgrade it to a wrapper.
+        existing=c.execute('SELECT metadata FROM hosted_apps WHERE domain=?',('africanbrowser.com',)).fetchone()
+        if existing and json.loads(existing[0]).get('artifact_kind')=='chromium-browser':
+            rows=[row for row in rows if row[0]!='africanbrowser.com']
         c.executemany('INSERT INTO hosted_apps(domain,metadata,updated) VALUES(?,?,?) ON CONFLICT(domain) DO UPDATE SET metadata=excluded.metadata,updated=excluded.updated',rows)
     print(f'Synchronized {len(rows)} listings; downloads enabled only for checksum-verified local APKs')
 if __name__=='__main__':
