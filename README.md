@@ -106,3 +106,21 @@ On the existing hosting server, pull this source and run `ansible-playbook -i lo
 
 Public paths after deployment: `/downloads/africa-bulk-hub.apk`, `/downloads/africa-bulk-hub.apk.sha256`, `/downloads/africa-bulk-hub-logo.png`, `/downloads/africa-bulk-hub-banner.png`, and `/downloads/africa-bulk-hub-release.json`. The listing appears under **Hosted apps**. Two integration tests cover public APK/logo HEAD/download behavior and preservation of other catalog records and visibility.
 
+
+## AfricanBrowser Chromium listing
+
+After deploying a verified browser build on the hosting server, run:
+
+```sh
+python3 tools/install_africanbrowser.py --website-root /var/www/olamide-auto/africanbrowser.com/public_html
+```
+
+The installer reads the browser deployment manifest, verifies the local ARM64 APK
+checksum and structure, checks the public HTTPS download size, backs up the
+existing store database, and replaces only the africanbrowser.com listing.
+It preserves visibility and links to the immutable browser-hosted APK. The
+service STORE_DATA setting supplies the database path; --database overrides it.
+Subsequent fleet sync preserves this Chromium listing instead of replacing it
+with the generic website client. This listing describes a development APK.
+The browser repository's ansible/olamidepanel.yml chains rebuild, website
+deployment and this installer. No other app listings are deleted.
