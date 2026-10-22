@@ -1,0 +1,18 @@
+{
+  "name": "DigiMarketing",
+  "package": "com.olamidepanel.digimarketing.dev",
+  "category": "Business",
+  "platform": "Android",
+  "min_android": "8.0",
+  "website": "https://digimarketing.olamidepanel.com/",
+  "privacy": "https://digimarketing.olamidepanel.com/privacy",
+  "channel": "development",
+  "status": "built_hosting_pending",
+  "description": "Turn attention into opportunity. AI-assisted campaign planning, editing, approval and scheduling. Direct publishing for configured Mastodon accounts; copy export for other channels. Android website client; internet and a working DigiMarketing website required.",
+  "version": "1.0.0-dev",
+  "version_code": 1,
+  "apk_url": "https://digimarketing.olamidepanel.com/downloads/DigiMarketing.apk",
+  "sha256": "906dcfcb18ea79ac5b0a3923ddd4f1b23afd05dc10c97f2fa3c671f0f0e250c4",
+  "icon_url": "https://digimarketing.olamidepanel.com/brand.png",
+  "signing": "development debug key; production release signing not configured"
+}
