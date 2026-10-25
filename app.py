@@ -63,6 +63,16 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             if self.command!='HEAD':self.wfile.write(raw)
             return
+        if self.command in ('GET','HEAD') and path in ('/downloads/africa-credit.apk','/downloads/africa-credit.apk.sha256','/downloads/africa-credit-logo.png'):
+            file=ROOT/'static/africacredit'/path.split('/')[-1]
+            if not file.is_file():self.send({'error':'Africa Credit download not installed'},404);return
+            raw=file.read_bytes()
+            kind='application/vnd.android.package-archive' if path.endswith('.apk') else 'image/png' if path.endswith('.png') else 'text/plain'
+            self.send_response(200);self.headers_out(kind,len(raw))
+            if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="africa-credit.apk"')
+            self.end_headers()
+            if self.command!='HEAD':self.wfile.write(raw)
+            return
         hub_downloads={'/downloads/africa-bulk-hub.apk':'africa-bulk-hub.apk','/downloads/africa-bulk-hub.apk.sha256':'africa-bulk-hub.apk.sha256','/downloads/africa-bulk-hub-logo.png':'logo.png','/downloads/africa-bulk-hub-banner.png':'banner.png','/downloads/africa-bulk-hub-release.json':'release.json'}
         if self.command in ('GET','HEAD') and path in hub_downloads:
             file=ROOT/'static/afribulkhub'/hub_downloads[path]
