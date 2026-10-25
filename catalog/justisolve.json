@@ -1,0 +1,26 @@
+{
+  "domain": "justisolve.com",
+  "name": "JustiSolve",
+  "category": "Justice",
+  "package": "com.justisolve.mobile.preview",
+  "website": "https://justisolve.com/",
+  "install_url": "https://justisolve.com/install",
+  "description": "JustiSolve mobile client for private legal workspaces, role profiles, case records and configured AI tools. Uses your existing account and the live JustiSolve platform.",
+  "features": [
+    "Dedicated HTTPS Android preview client",
+    "Android and iPhone browser installation",
+    "Role-based private legal workspaces",
+    "System file picker for uploads",
+    "First-party foreground microphone permission",
+    "Home, Reload and Browser controls"
+  ],
+  "limitations": "Development preview, internet required. Downloads, camera/video and unsupported flows may require Browser sign-in. No native background calls, push notifications or offline case work. No Google Play or Apple App Store publication.",
+  "platforms": "Android 8+ APK \u00b7 Android/iPhone web app",
+  "apk_url": "https://africanappsstore.space/downloads/justisolve-preview.apk",
+  "sha256": "14d618dcd9dc0c2cd12b3e488ef0341c81782cbf1930a1069986fcf611261491",
+  "download_status": "available",
+  "artifact_kind": "justisolve-preview",
+  "channel": "development-preview",
+  "version": "0.1.0",
+  "signing_certificate_sha256": "da06800f4f9ea924c9de411e9570db70a5d4941cab30ddda9d70e3f588eddc2c"
+}

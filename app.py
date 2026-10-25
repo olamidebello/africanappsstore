@@ -83,6 +83,16 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             if self.command!='HEAD':self.wfile.write(raw)
             return
+        justisolve_downloads={'/downloads/justisolve-preview.apk':'justisolve-preview.apk','/downloads/justisolve-preview.apk.sha256':'justisolve-preview.apk.sha256','/downloads/justisolve-release.json':'release.json','/downloads/justisolve-icon.png':'justisolve-icon.png'}
+        if self.command in ('GET','HEAD') and path in justisolve_downloads:
+            file=ROOT/'static/justisolve'/justisolve_downloads[path]
+            if not file.is_file():self.send({'error':'JustiSolve download not installed'},404);return
+            raw=file.read_bytes();kind='application/vnd.android.package-archive' if path.endswith('.apk') else 'image/png' if path.endswith('.png') else 'application/json' if path.endswith('.json') else 'text/plain'
+            self.send_response(200);self.headers_out(kind,len(raw))
+            if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="justisolve-preview.apk"')
+            self.end_headers()
+            if self.command!='HEAD':self.wfile.write(raw)
+            return
         hub_downloads={'/downloads/africa-bulk-hub.apk':'africa-bulk-hub.apk','/downloads/africa-bulk-hub.apk.sha256':'africa-bulk-hub.apk.sha256','/downloads/africa-bulk-hub-logo.png':'logo.png','/downloads/africa-bulk-hub-banner.png':'banner.png','/downloads/africa-bulk-hub-release.json':'release.json'}
         if self.command in ('GET','HEAD') and path in hub_downloads:
             file=ROOT/'static/afribulkhub'/hub_downloads[path]

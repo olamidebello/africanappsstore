@@ -24,6 +24,7 @@ def main():
   subprocess.run(['python3',ROOT/'tools/install_media_hub.py','--database',database],check=True)
   subprocess.run(['python3',ROOT/'tools/install_postmaster.py','--database',database],check=True)
   subprocess.run(['python3',ROOT/'tools/install_aims.py','--database',database,'--static',ROOT/'static/aims'],check=True)
+  subprocess.run(['python3',ROOT/'tools/install_justisolve.py','--database',database,'--static',code/'static/justisolve'],check=True)
   subprocess.run(['systemctl','restart','africanappsstore.service'],check=True)
   for attempt in range(15):
    try:

@@ -18,6 +18,9 @@ def synchronize(db,manifest,downloads):
         c.execute('CREATE TABLE IF NOT EXISTS hosted_apps(domain TEXT PRIMARY KEY,metadata TEXT NOT NULL,visible INTEGER NOT NULL DEFAULT 1,updated INTEGER NOT NULL)')
         # A verified Chromium release replaces the generic website client for
         # this domain. Routine fleet sync must not downgrade it to a wrapper.
+        specialized=c.execute('SELECT metadata FROM hosted_apps WHERE domain=?',('justisolve.com',)).fetchone()
+        if specialized and json.loads(specialized[0]).get('artifact_kind')=='justisolve-preview':
+            rows=[row for row in rows if row[0]!='justisolve.com']
         existing=c.execute('SELECT metadata FROM hosted_apps WHERE domain=?',('africanbrowser.com',)).fetchone()
         if existing and json.loads(existing[0]).get('artifact_kind')=='chromium-browser':
             rows=[row for row in rows if row[0]!='africanbrowser.com']

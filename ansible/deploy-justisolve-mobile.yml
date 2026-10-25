@@ -1,0 +1,40 @@
+---
+- name: Publish the JustiSolve preview and install link in the existing Apps Store
+  hosts: all
+  become: true
+  vars:
+    justisolve_store_source: /opt/justisolve-store-release
+  tasks:
+    - name: Pull current store source preserving local edits
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africanappsstore.git
+        dest: '{{ justisolve_store_source }}'
+        version: main
+        force: false
+    - name: Verify the JustiSolve APK checksum
+      ansible.builtin.command:
+        argv: [sha256sum, -c, justisolve-preview.apk.sha256]
+        chdir: '{{ justisolve_store_source }}/static/justisolve'
+      changed_when: false
+    - name: Update the existing store and install the verified listing with backups
+      ansible.builtin.command:
+        argv: [python3, '{{ justisolve_store_source }}/tools/update_store.py']
+      register: justisolve_store_update
+      changed_when: "'UPDATED' in justisolve_store_update.stdout"
+    - name: Verify the public HTTPS Android download
+      ansible.builtin.uri:
+        url: https://africanappsstore.space/downloads/justisolve-preview.apk
+        method: HEAD
+        validate_certs: true
+        status_code: 200
+    - name: Verify the JustiSolve catalog entry
+      ansible.builtin.uri:
+        url: https://africanappsstore.space/api/hosted-apps
+        return_content: true
+        validate_certs: true
+        status_code: 200
+      register: justisolve_store_listing
+      failed_when: "'JustiSolve listing hidden by administrator' not in justisolve_store_update.stdout and not (justisolve_store_listing.json | selectattr('domain','equalto','justisolve.com') | selectattr('artifact_kind','equalto','justisolve-preview') | list)"
+    - name: Report mobile listing
+      ansible.builtin.debug:
+        msg: 'JustiSolve appears under Hosted apps unless an administrator has hidden it. APK: https://africanappsstore.space/downloads/justisolve-preview.apk — web installation: https://justisolve.com/install'
