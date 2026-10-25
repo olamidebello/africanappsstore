@@ -1,0 +1,25 @@
+---
+- name: Update Olamide SIP device-aware installation in the existing Apps Store
+  hosts: all
+  become: true
+  tasks:
+    - name: Pull isolated current store source
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africanappsstore.git
+        dest: /opt/olamide-sip-store-update
+        version: main
+        force: false
+    - name: Update only SIP install routes and listing with rollback
+      ansible.builtin.command:
+        argv: [python3, /opt/olamide-sip-store-update/tools/update_sip_store.py]
+      changed_when: true
+    - name: Verify public SIP installation page
+      ansible.builtin.uri:
+        url: https://africanappsstore.space/install/sip
+        status_code: 200
+        return_content: true
+      register: sip_install
+      failed_when: "'Install or update Olamide SIP' not in sip_install.content"
+    - name: Report installation link
+      ansible.builtin.debug:
+        msg: 'SIP install/update page: https://africanappsstore.space/install/sip. Published APK and desktop links refresh from GitHub. iPhone/iPad use browser installation; native iOS requires Apple signing.'

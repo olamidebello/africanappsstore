@@ -1,3 +1,4 @@
+from sip_downloads import serve_sip
 import os, sqlite3, json, hashlib, secrets, hmac, time, re, zipfile
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
@@ -53,6 +54,8 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
+        # SIP_DEVICE_INSTALL_V1
+        if serve_sip(self,path):return
         if self.command in ('GET','HEAD') and path in ('/downloads/postmaster.apk','/downloads/postmaster.apk.sha256','/downloads/postmaster-logo.png','/downloads/postmaster-release.json'):
             names={'/downloads/postmaster.apk':'postmaster.apk','/downloads/postmaster.apk.sha256':'postmaster.apk.sha256','/downloads/postmaster-logo.png':'logo.png','/downloads/postmaster-release.json':'release.json'}
             file=ROOT/'static/postmaster'/names[path]

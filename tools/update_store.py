@@ -12,7 +12,7 @@ def main():
  if not code.is_absolute() or not (code/'app.py').is_file() or not database.is_file():raise ValueError('Existing store code or database not found; inspect its service configuration')
  port=int(env.get('PORT','8080'));backup=state/('backup-'+str(time.time_ns()));backup.mkdir(mode=0o700)
  with sqlite3.connect(database) as src,sqlite3.connect(backup/'store.sqlite3') as dst:src.backup(dst)
- files=[Path('app.py')]+[f.relative_to(ROOT) for folder in ('templates','static') for f in (ROOT/folder).rglob('*') if f.is_file()];saved={}
+ files=[Path('app.py'),Path('sip_downloads.py')]+[f.relative_to(ROOT) for folder in ('templates','static') for f in (ROOT/folder).rglob('*') if f.is_file()];saved={}
  try:
   for rel in files:
    target=code/rel;saved[target]=target.read_bytes() if target.exists() else None
@@ -25,6 +25,7 @@ def main():
   subprocess.run(['python3',ROOT/'tools/install_postmaster.py','--database',database],check=True)
   subprocess.run(['python3',ROOT/'tools/install_aims.py','--database',database,'--static',ROOT/'static/aims'],check=True)
   subprocess.run(['python3',ROOT/'tools/install_justisolve.py','--database',database,'--static',code/'static/justisolve'],check=True)
+  subprocess.run(['python3',ROOT/'tools/install_sip.py','--database',database],check=True)
   subprocess.run(['systemctl','restart','africanappsstore.service'],check=True)
   for attempt in range(15):
    try:
