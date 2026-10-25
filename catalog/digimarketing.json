@@ -7,12 +7,22 @@
   "website": "https://digimarketing.olamidepanel.com/",
   "privacy": "https://digimarketing.olamidepanel.com/privacy",
   "channel": "development",
-  "status": "built_hosting_pending",
-  "description": "Turn attention into opportunity. AI-assisted campaign planning, editing, approval and scheduling. Direct publishing for configured Mastodon accounts; copy export for other channels. Android website client; internet and a working DigiMarketing website required.",
+  "status": "available",
+  "description": "Turn attention into opportunity. Create, review and schedule marketing campaigns through authorized Facebook Pages and Mastodon accounts. Marketplace, account credit and shared Page access through the current website. Internet required.",
   "version": "1.0.0-dev",
   "version_code": 1,
   "apk_url": "https://digimarketing.olamidepanel.com/downloads/DigiMarketing.apk",
   "sha256": "906dcfcb18ea79ac5b0a3923ddd4f1b23afd05dc10c97f2fa3c671f0f0e250c4",
   "icon_url": "https://digimarketing.olamidepanel.com/brand.png",
-  "signing": "development debug key; production release signing not configured"
+  "signing": "development debug key; production release signing not configured",
+  "domain": "digimarketing.olamidepanel.com",
+  "download_status": "available",
+  "features": [
+    "AI-assisted campaign drafting when configured",
+    "Reviewed campaign scheduling",
+    "Authorized Facebook Page and Mastodon publishing",
+    "Marketplace and account credit",
+    "Shared Page access managed by super admin"
+  ],
+  "limitations": "Development-signed Android website client. Internet required. No offline mode or native push notifications. Other social networks support copy export."
 }
