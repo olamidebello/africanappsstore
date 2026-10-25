@@ -128,6 +128,14 @@ deployment and this installer. No other app listings are deleted.
 ## Africa Media Hub listing
 The Hosted apps catalog includes Africa Media Hub, its app icon, slogan, TV and connection features, website, and device-specific install page. No unverified APK URL is advertised. `tools/update_store.py` upserts this listing during deployment and preserves existing administrator visibility settings and unrelated apps. Publish with `ansible/pull-and-deploy.yml` using the existing service, port, domain and TLS configuration.
 
+## AIMS Android signed release
+
+`static/aims/aims.apk` contains AIMS 1.0.1, package `world.africandroid.aims`, Android 8+. The signature was verified with Android SDK apksigner; SHA-256 and signing-certificate fingerprints are in `catalog/aims.json`. Private keys are not committed. AIMS is an HTTPS website client with document picker, Home/Reload/Back and browser controls. It requires internet and the operational AIMS site; offline identity, native biometrics and push notifications are not included. Physical Android device acceptance testing remains outstanding.
+
+`tools/update_store.py` installs the AIMS listing as part of routine updates. The installer verifies the local APK checksum, preserves hidden/visible state and other listings; fleet sync does not downgrade it. `/downloads/aims.apk`, `/downloads/aims.apk.sha256` and `/downloads/aims-logo.png` are public GET/HEAD routes after deployment.
+
+Run on the hosting server: `ansible-playbook -i localhost, -c local ansible/deploy-aims-mobile.yml`. This pulls AIMS and store source, deploys the AIMS install page/embedded APK, updates the existing store with its backup mechanism, and checks public HTTPS install/download/catalog endpoints. Existing AIMS accounts and store users stay intact. Repository publication alone does not update the live website.
+
 ## Postmaster Android listing
 Postmaster 1.0.0 (com.justisolve.postmaster, Android 8+) is included as a signed development APK under static/postmaster, with checksum, public signing fingerprint and logo. Deploy with ansible/deploy-postmaster-mobile.yml. The store updater preserves existing visibility and unrelated apps. Public routes: /downloads/postmaster.apk, /downloads/postmaster.apk.sha256, /downloads/postmaster-logo.png and /downloads/postmaster-release.json. Postmaster's install page: https://postmaster.justisolve.com/install.
 

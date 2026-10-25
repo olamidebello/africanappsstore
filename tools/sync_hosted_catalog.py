@@ -21,6 +21,9 @@ def synchronize(db,manifest,downloads):
         existing=c.execute('SELECT metadata FROM hosted_apps WHERE domain=?',('africanbrowser.com',)).fetchone()
         if existing and json.loads(existing[0]).get('artifact_kind')=='chromium-browser':
             rows=[row for row in rows if row[0]!='africanbrowser.com']
+        aims=c.execute('SELECT metadata FROM hosted_apps WHERE domain=?',('identity.africandroid.world',)).fetchone()
+        if aims and json.loads(aims[0]).get('artifact_kind')=='aims-android-client':
+            rows=[row for row in rows if row[0]!='identity.africandroid.world']
         c.executemany('INSERT INTO hosted_apps(domain,metadata,updated) VALUES(?,?,?) ON CONFLICT(domain) DO UPDATE SET metadata=excluded.metadata,updated=excluded.updated',rows)
     print(f'Synchronized {len(rows)} listings; downloads enabled only for checksum-verified local APKs')
 if __name__=='__main__':

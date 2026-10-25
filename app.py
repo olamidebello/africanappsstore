@@ -73,6 +73,16 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             if self.command!='HEAD':self.wfile.write(raw)
             return
+        aims_downloads={'/downloads/aims.apk':'aims.apk','/downloads/aims.apk.sha256':'aims.apk.sha256','/downloads/aims-logo.png':'logo.png'}
+        if self.command in ('GET','HEAD') and path in aims_downloads:
+            file=ROOT/'static/aims'/aims_downloads[path]
+            if not file.is_file():self.send({'error':'AIMS download not installed'},404);return
+            raw=file.read_bytes();kind='application/vnd.android.package-archive' if path.endswith('.apk') else 'image/png' if path.endswith('.png') else 'text/plain'
+            self.send_response(200);self.headers_out(kind,len(raw))
+            if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="AIMS.apk"')
+            self.end_headers()
+            if self.command!='HEAD':self.wfile.write(raw)
+            return
         hub_downloads={'/downloads/africa-bulk-hub.apk':'africa-bulk-hub.apk','/downloads/africa-bulk-hub.apk.sha256':'africa-bulk-hub.apk.sha256','/downloads/africa-bulk-hub-logo.png':'logo.png','/downloads/africa-bulk-hub-banner.png':'banner.png','/downloads/africa-bulk-hub-release.json':'release.json'}
         if self.command in ('GET','HEAD') and path in hub_downloads:
             file=ROOT/'static/afribulkhub'/hub_downloads[path]
