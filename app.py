@@ -53,6 +53,16 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
+        if self.command in ('GET','HEAD') and path in ('/downloads/postmaster.apk','/downloads/postmaster.apk.sha256','/downloads/postmaster-logo.png','/downloads/postmaster-release.json'):
+            names={'/downloads/postmaster.apk':'postmaster.apk','/downloads/postmaster.apk.sha256':'postmaster.apk.sha256','/downloads/postmaster-logo.png':'logo.png','/downloads/postmaster-release.json':'release.json'}
+            file=ROOT/'static/postmaster'/names[path]
+            if not file.is_file():self.send({'error':'Postmaster release not installed'},404);return
+            raw=file.read_bytes();kind='application/vnd.android.package-archive' if path.endswith('.apk') else 'image/png' if path.endswith('.png') else 'application/json' if path.endswith('.json') else 'text/plain'
+            self.send_response(200);self.headers_out(kind,len(raw))
+            if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="postmaster.apk"')
+            self.end_headers()
+            if self.command!='HEAD':self.wfile.write(raw)
+            return
         hub_downloads={'/downloads/africa-bulk-hub.apk':'africa-bulk-hub.apk','/downloads/africa-bulk-hub.apk.sha256':'africa-bulk-hub.apk.sha256','/downloads/africa-bulk-hub-logo.png':'logo.png','/downloads/africa-bulk-hub-banner.png':'banner.png','/downloads/africa-bulk-hub-release.json':'release.json'}
         if self.command in ('GET','HEAD') and path in hub_downloads:
             file=ROOT/'static/afribulkhub'/hub_downloads[path]

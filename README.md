@@ -127,3 +127,8 @@ deployment and this installer. No other app listings are deleted.
 
 ## Africa Media Hub listing
 The Hosted apps catalog includes Africa Media Hub, its app icon, slogan, TV and connection features, website, and device-specific install page. No unverified APK URL is advertised. `tools/update_store.py` upserts this listing during deployment and preserves existing administrator visibility settings and unrelated apps. Publish with `ansible/pull-and-deploy.yml` using the existing service, port, domain and TLS configuration.
+
+## Postmaster Android listing
+Postmaster 1.0.0 (com.justisolve.postmaster, Android 8+) is included as a signed development APK under static/postmaster, with checksum, public signing fingerprint and logo. Deploy with ansible/deploy-postmaster-mobile.yml. The store updater preserves existing visibility and unrelated apps. Public routes: /downloads/postmaster.apk, /downloads/postmaster.apk.sha256, /downloads/postmaster-logo.png and /downloads/postmaster-release.json. Postmaster's install page: https://postmaster.justisolve.com/install.
+
+Internet and valid website HTTPS are required. File selection/upload is supported; external checkout opens the browser. No offline mail or native push; device acceptance testing is pending. No private signing material is committed.

@@ -22,6 +22,7 @@ def main():
   # Migration adds only the new catalog table. Existing account data stays intact.
   subprocess.run(['python3',ROOT/'tools/sync_hosted_catalog.py','--database',database,'--manifest',ROOT/'mobile/fleet/apps.json'],check=True)
   subprocess.run(['python3',ROOT/'tools/install_media_hub.py','--database',database],check=True)
+  subprocess.run(['python3',ROOT/'tools/install_postmaster.py','--database',database],check=True)
   subprocess.run(['systemctl','restart','africanappsstore.service'],check=True)
   for attempt in range(15):
    try:
