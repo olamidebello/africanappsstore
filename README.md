@@ -124,3 +124,6 @@ Subsequent fleet sync preserves this Chromium listing instead of replacing it
 with the generic website client. This listing describes a development APK.
 The browser repository's ansible/olamidepanel.yml chains rebuild, website
 deployment and this installer. No other app listings are deleted.
+
+## Africa Media Hub listing
+The Hosted apps catalog includes Africa Media Hub, its app icon, slogan, TV and connection features, website, and device-specific install page. No unverified APK URL is advertised. `tools/update_store.py` upserts this listing during deployment and preserves existing administrator visibility settings and unrelated apps. Publish with `ansible/pull-and-deploy.yml` using the existing service, port, domain and TLS configuration.

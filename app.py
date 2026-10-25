@@ -72,8 +72,8 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             if self.command!='HEAD': self.wfile.write(raw)
             return
-        if self.command in ('GET','HEAD') and path in ('/','/copyright','/terms','/privacy','/static/app.js','/static/style.css','/static/logo.jpg'):
-            file=ROOT/({'/':'templates/index.html','/copyright':'templates/copyright.html','/terms':'templates/terms.html','/privacy':'templates/privacy.html'}.get(path,path.lstrip('/'))); raw=file.read_bytes(); self.send_response(200); self.headers_out('text/html' if path in ('/','/copyright','/terms','/privacy') else 'text/javascript' if path.endswith('.js') else 'image/jpeg' if path.endswith('.jpg') else 'text/css',len(raw)); self.end_headers();
+        if self.command in ('GET','HEAD') and path in ('/','/copyright','/terms','/privacy','/static/app.js','/static/style.css','/static/logo.jpg','/static/africa-media-icon.svg'):
+            file=ROOT/({'/':'templates/index.html','/copyright':'templates/copyright.html','/terms':'templates/terms.html','/privacy':'templates/privacy.html'}.get(path,path.lstrip('/'))); raw=file.read_bytes(); self.send_response(200); self.headers_out('text/html' if path in ('/','/copyright','/terms','/privacy') else 'text/javascript' if path.endswith('.js') else 'image/svg+xml' if path.endswith('.svg') else 'image/jpeg' if path.endswith('.jpg') else 'text/css',len(raw)); self.end_headers();
             if self.command!='HEAD': self.wfile.write(raw)
             return
         if self.command=='HEAD': self.send({'error':'Not found'},404); return

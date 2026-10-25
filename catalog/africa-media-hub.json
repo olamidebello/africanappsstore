@@ -1,0 +1,24 @@
+{
+  "domain": "media.africandroid.world",
+  "name": "Africa Media Hub",
+  "category": "Entertainment",
+  "package": "com.africamedia.hub",
+  "website": "https://media.africandroid.world/",
+  "install_url": "https://media.africandroid.world/install",
+  "privacy_url": "https://media.africandroid.world/legal/privacy",
+  "icon_url": "/static/africa-media-icon.svg",
+  "platforms": "Web · Mobile · Desktop · Compatible smart TV browsers",
+  "description": "Africa Creates. The World Connects. Discover live television, news, music, movies and family entertainment through Africa Media Hub.",
+  "features": [
+    "Live channel guide and search by country",
+    "TV mode with remote navigation and numbered channel selection",
+    "Last-watched startup, favorite channels and previous-channel recall",
+    "Low-data mode and playback recovery for compatible streams",
+    "Provider links with in-app and external viewing options",
+    "Device-specific installation guidance and available downloads"
+  ],
+  "limitations": "Internet required. Playback, lower-quality variants and remote support depend on device and source. Third-party services may require subscriptions or restrict viewing by region. Native packages appear on the install page only when published; this listing does not guarantee every device has an installable package.",
+  "apk_url": null,
+  "sha256": "",
+  "download_status": "install_page"
+}

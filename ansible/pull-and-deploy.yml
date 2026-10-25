@@ -38,6 +38,14 @@
         - {path: '/privacy', marker: 'Privacy Policy'}
       register: store_page
       failed_when: store_page.status != 200 or item.marker not in store_page.content
+    - name: Verify Africa Media Hub is in the public catalog
+      ansible.builtin.uri:
+        url: '{{ store_public_url }}/api/hosted-apps'
+        validate_certs: true
+        status_code: 200
+        return_content: true
+      register: media_catalog
+      failed_when: "media_catalog.status != 200 or 'media.africandroid.world' not in media_catalog.content"
     - name: Report deployed version
       ansible.builtin.debug:
         msg: 'Deployed {{ store_source.after }} to {{ store_public_url }}; copyright, terms and privacy pages verified.'
