@@ -1,0 +1,16 @@
+{
+  "name": "Cellblock Cat & Mouse",
+  "version": "1.0.0",
+  "version_code": 1,
+  "package": "world.africandroid.cellblock",
+  "minimum_android": 8,
+  "sha256": "36518004e8a6a64ab1a3803b914c58c180cbcf7cf4e907f876df77bedb28ab5f",
+  "size_bytes": 61940,
+  "owner": "Olamide Olatayo Bello",
+  "kind": "android-online-game-client",
+  "website": "https://cellblockcatandmouse.africandroid.world/",
+  "permissions": [
+    "INTERNET"
+  ],
+  "limitations": "Online game client using Android System WebView; no offline multiplayer; iOS uses Add to Home Screen; not Play Store or Apple App Store published."
+}

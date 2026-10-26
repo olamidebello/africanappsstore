@@ -1,0 +1,24 @@
+{
+  "domain": "cellblockcatandmouse.africandroid.world",
+  "name": "Cellblock Cat & Mouse",
+  "category": "Games",
+  "package": "world.africandroid.cellblock",
+  "version": "1.0.0",
+  "artifact_kind": "cellblock-android-client",
+  "website": "https://cellblockcatandmouse.africandroid.world/",
+  "description": "Online tactical inmate-versus-officer strategy game by Olamide Olatayo Bello. Dedicated Android client for the live web game.",
+  "features": [
+    "First-person cellblock view",
+    "Inmate and officer roles",
+    "Multiplayer rooms and bot practice",
+    "Touch aiming and sprint controls",
+    "Private fictional loadout choices",
+    "Browser install option for iPhone/iPad"
+  ],
+  "limitations": "Internet and a functioning HTTPS game server required. Uses Android System WebView. No offline multiplayer. Android device gameplay has not been tested on hardware.",
+  "platforms": "Android 8+ \u00b7 Signed direct APK \u00b7 iOS browser app",
+  "apk_url": "https://africanappsstore.space/downloads/cellblock.apk",
+  "sha256": "36518004e8a6a64ab1a3803b914c58c180cbcf7cf4e907f876df77bedb28ab5f",
+  "privacy": "https://cellblockcatandmouse.africandroid.world/privacy",
+  "owner": "Olamide Olatayo Bello"
+}

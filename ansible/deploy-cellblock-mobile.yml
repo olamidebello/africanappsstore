@@ -1,0 +1,35 @@
+---
+- name: Publish Cellblock mobile app in existing African Apps Store
+  hosts: all
+  become: true
+  vars:
+    store_update_source: /opt/cellblock-store-release
+  tasks:
+    - name: Pull store code and verified game release
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africanappsstore.git
+        dest: '{{ store_update_source }}'
+        version: main
+        force: false
+    - name: Verify Cellblock APK checksum
+      ansible.builtin.command:
+        argv: [sha256sum, -c, cellblock.apk.sha256]
+        chdir: '{{ store_update_source }}/static/cellblock'
+      changed_when: false
+    - name: Update existing store using its backup mechanism
+      ansible.builtin.command:
+        argv: [python3, '{{ store_update_source }}/tools/update_store.py']
+      register: store_update
+      changed_when: "'UPDATED' in store_update.stdout"
+    - name: Verify public game download
+      ansible.builtin.uri:
+        url: https://africanappsstore.space/downloads/cellblock.apk
+        method: HEAD
+        status_code: 200
+    - name: Verify public game listing
+      ansible.builtin.uri:
+        url: https://africanappsstore.space/api/hosted-apps
+        return_content: true
+        status_code: 200
+      register: game_listing
+      failed_when: "game_listing.status != 200 or 'cellblockcatandmouse.africandroid.world' not in game_listing.content"

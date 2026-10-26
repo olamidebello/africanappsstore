@@ -54,6 +54,15 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
+        cellblock_files={'/downloads/cellblock.apk':('cellblock.apk','application/vnd.android.package-archive'),'/downloads/cellblock.apk.sha256':('cellblock.apk.sha256','text/plain'),'/downloads/cellblock-logo.webp':('logo.webp','image/webp'),'/downloads/cellblock-release.json':('release.json','application/json')}
+        if self.command in ('GET','HEAD') and path in cellblock_files:
+            name,mime=cellblock_files[path];file=ROOT/'static/cellblock'/name
+            if not file.is_file():self.send({'error':'Cellblock release not installed'},404);return
+            raw=file.read_bytes();self.send_response(200);self.headers_out(mime,len(raw))
+            if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="CellblockCatAndMouse.apk"')
+            self.end_headers()
+            if self.command!='HEAD':self.wfile.write(raw)
+            return
         # SIP_DEVICE_INSTALL_V1
         if serve_sip(self,path):return
         if self.command in ('GET','HEAD') and path in ('/downloads/postmaster.apk','/downloads/postmaster.apk.sha256','/downloads/postmaster-logo.png','/downloads/postmaster-release.json'):
