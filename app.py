@@ -63,6 +63,15 @@ class Handler(BaseHTTPRequestHandler):
             self.end_headers()
             if self.command!='HEAD':self.wfile.write(raw)
             return
+        kakakin_files={'/downloads/kakakin.apk':('kakakin.apk','application/vnd.android.package-archive'),'/downloads/kakakin.apk.sha256':('kakakin.apk.sha256','text/plain'),'/downloads/kakakin-logo.png':('logo.png','image/png'),'/downloads/kakakin-release.json':('release.json','application/json')}
+        if self.command in ('GET','HEAD') and path in kakakin_files:
+            name,mime=kakakin_files[path];file=ROOT/'static/kakakin'/name
+            if not file.is_file():self.send({'error':'Kakakin release not installed'},404);return
+            raw=file.read_bytes();self.send_response(200);self.headers_out(mime,len(raw))
+            if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="Kakakin.apk"')
+            self.end_headers()
+            if self.command!='HEAD':self.wfile.write(raw)
+            return
         # SIP_DEVICE_INSTALL_V1
         if serve_sip(self,path):return
         if self.command in ('GET','HEAD') and path in ('/downloads/postmaster.apk','/downloads/postmaster.apk.sha256','/downloads/postmaster-logo.png','/downloads/postmaster-release.json'):

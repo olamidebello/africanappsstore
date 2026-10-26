@@ -1,0 +1,34 @@
+{
+  "name": "Kakakin",
+  "version": "1.0.0",
+  "version_code": 1,
+  "package": "world.africandroid.kakakin",
+  "minimum_android": "8.0",
+  "sha256": "715215dcad3d92f627364349382970d4095579ba6da4ba954e7a909381d45e35",
+  "certificate_sha256": "2129d4e8e047f68ea2048e9fa1e59b6a867099e83830b453560d4088a89c107d",
+  "size_bytes": 16856,
+  "owner": "Olamide Olatayo Bello Corporation",
+  "website": "https://kakakin.africandroid.world/",
+  "permissions": [
+    "INTERNET"
+  ],
+  "limitations": "Online HTTPS website client. No offline messaging, native push or background contact access. Android device acceptance testing pending. iOS uses Safari Add to Home Screen.",
+  "domain": "kakakin.africandroid.world",
+  "category": "Business",
+  "privacy": "https://kakakin.africandroid.world/privacy",
+  "terms": "https://kakakin.africandroid.world/terms",
+  "copyright": "https://kakakin.africandroid.world/copyright",
+  "description": "Consent-based WhatsApp Business and SMS campaigns, voluntary referrals, community marketplace and secure hosted checkout. Owned by Olamide Olatayo Bello Corporation.",
+  "features": [
+    "Campaigns and contact management with recorded consent",
+    "Tenant workspaces and role-based access",
+    "Marketplace services and order tracking",
+    "Paystack and Stripe hosted checkout when configured",
+    "Super admin API and gateway controls",
+    "User-selected file uploads and external browser links"
+  ],
+  "platforms": "Android 8+ \u00b7 Signed direct APK \u00b7 iOS browser shortcut",
+  "apk_url": "https://africanappsstore.space/downloads/kakakin.apk",
+  "download_status": "available",
+  "icon": "/downloads/kakakin-logo.png"
+}
