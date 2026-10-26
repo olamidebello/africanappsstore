@@ -140,3 +140,17 @@ Run on the hosting server: `ansible-playbook -i localhost, -c local ansible/depl
 Postmaster 1.0.0 (com.justisolve.postmaster, Android 8+) is included as a signed development APK under static/postmaster, with checksum, public signing fingerprint and logo. Deploy with ansible/deploy-postmaster-mobile.yml. The store updater preserves existing visibility and unrelated apps. Public routes: /downloads/postmaster.apk, /downloads/postmaster.apk.sha256, /downloads/postmaster-logo.png and /downloads/postmaster-release.json. Postmaster's install page: https://postmaster.justisolve.com/install.
 
 Internet and valid website HTTPS are required. File selection/upload is supported; external checkout opens the browser. No offline mail or native push; device acceptance testing is pending. No private signing material is committed.
+
+
+## Kakakin publication across two hosts
+
+Kakakin runs on 154.16.170.86. Public africanappsstore.space currently points to 181.214.149.146. Updating an africanappsstore.service copy on the Kakakin machine does not update that public store. The Kakakin publisher now checks all public DNS addresses against the target host before it changes store files. It does not move DNS or replace other domains. For verified NAT deployments, Ansible may be given store_public_addresses explicitly.
+
+On the public store host (181.214.149.146), run:
+
+```sh
+curl -fL https://raw.githubusercontent.com/olamidebello/africanappsstore/main/scripts/publish-kakakin.sh -o /root/publish-kakakin.sh
+bash /root/publish-kakakin.sh
+```
+
+The bootstrap preserves source edits, updates the existing store with database/code backups, checks the locally served APK checksum and catalog entry, then verifies public HTTPS downloads and catalog. No Kakakin application rebuild or administrator password is needed. From a controller already authorized for SSH to the store, use `ansible-playbook -i '181.214.149.146,' -u root ansible/publish-mobile.yml` in the Kakakin checkout instead. SSH authorization must already exist; the script does not copy credentials or change DNS to work around missing access.

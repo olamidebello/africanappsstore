@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Update the existing store service in place without changing its port or TLS."""
-import argparse,json,os,shlex,shutil,sqlite3,subprocess,time,urllib.request
+import argparse,hashlib,json,os,shlex,shutil,sqlite3,subprocess,time,urllib.request
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def prop(name):return subprocess.check_output(['systemctl','show','africanappsstore.service','--property='+name,'--value'],text=True).strip()
 def main():
- p=argparse.ArgumentParser();p.add_argument('--state',default='/var/lib/olamide-store-update');a=p.parse_args()
+ p=argparse.ArgumentParser();p.add_argument('--state',default='/var/lib/olamide-store-update');p.add_argument('--verify-kakakin',action='store_true');a=p.parse_args()
  state=Path(a.state);state.mkdir(parents=True,exist_ok=True,mode=0o700)
  code=Path(prop('WorkingDirectory'));env=dict(x.split('=',1) for x in shlex.split(prop('Environment')) if '=' in x)
  data=Path(env.get('STORE_DATA','/var/lib/africanappsstore'));database=data/'store.sqlite3'
@@ -40,6 +40,14 @@ def main():
   for route,marker in (('/terms','Terms and Conditions'),('/privacy','Privacy Policy'),('/copyright','Copyright')):
    with urllib.request.urlopen(f'http://127.0.0.1:{port}{route}',timeout=10) as r:
     if marker not in r.read().decode():raise ValueError('Legal page check failed: '+route)
+  if a.verify_kakakin:
+   expected=json.loads((ROOT/'static/kakakin/release.json').read_text())
+   with urllib.request.urlopen(f'http://127.0.0.1:{port}/downloads/kakakin.apk',timeout=15) as response:
+    actual=hashlib.sha256(response.read(expected['size_bytes']+1)).hexdigest()
+    if actual!=expected['sha256']:raise ValueError('Local running store does not serve the expected Kakakin APK')
+   with urllib.request.urlopen(f'http://127.0.0.1:{port}/api/hosted-apps',timeout=10) as response:
+    listing=next((x for x in json.load(response) if x.get('domain')=='kakakin.africandroid.world'),None)
+    if not listing or listing.get('sha256')!=expected['sha256']:raise ValueError('Kakakin catalog missing, hidden or stale; inspect store admin visibility')
  except Exception:
   for path,content in saved.items():
    if content is None:path.unlink(missing_ok=True)
