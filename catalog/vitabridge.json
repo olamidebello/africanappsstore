@@ -1,0 +1,21 @@
+{
+  "domain": "vitabridge.olamidemedical.health",
+  "name": "VitaBridge",
+  "category": "Medical",
+  "package": "com.olamide.vitabridge.preview",
+  "website": "https://vitabridge.olamidemedical.health/",
+  "install_url": "https://vitabridge.olamidemedical.health/install.html",
+  "privacy_url": "https://vitabridge.olamidemedical.health/privacy.html",
+  "platforms": "Android 8+ development client · iPhone/iPad web app · Desktop web",
+  "description": "Care, connected. Medical transport platform by Olamide Olatayo Bello Corporation.",
+  "features": [
+    "Account signup and login on deployed website",
+    "Patient, dispatcher, crew and hospital demonstration workspaces",
+    "Tenant and marketplace demonstration controls",
+    "Android development download and web installation guidance"
+  ],
+  "limitations": "Development preview. Internet and deployed HTTPS website required. No real emergency dispatch, clinical-data authorization, background tracking, or live payment processing. Android download requires a successful release build; no native iOS package.",
+  "apk_url": null,
+  "sha256": "",
+  "download_status": "install_page"
+}
