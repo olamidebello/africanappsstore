@@ -1,13 +1,13 @@
 {
   "name": "JustiSolve Preview",
   "package": "com.justisolve.mobile.preview",
-  "version": "0.1.0",
-  "version_code": 1,
+  "version": "0.2.0",
+  "version_code": 2,
   "min_android": 8,
   "channel": "development-preview",
-  "sha256": "14d618dcd9dc0c2cd12b3e488ef0341c81782cbf1930a1069986fcf611261491",
+  "sha256": "7ba25912f5fc02090036b8379aaa51c6860624ca2ce90a8a75a3bd917ffb2835",
   "size_bytes": 25048,
-  "signing_certificate_sha256": "da06800f4f9ea924c9de411e9570db70a5d4941cab30ddda9d70e3f588eddc2c",
+  "signing_certificate_sha256": "4d893a9270a1f15e91001c4956d9925ea99d9b5ec3f00e9dc8ce14e4423b0280",
   "website": "https://justisolve.com/",
   "install_url": "https://justisolve.com/install",
   "native_background_calls": false
