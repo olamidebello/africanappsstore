@@ -1,0 +1,26 @@
+{
+  "domain": "sprintforge.netwizzard.tech",
+  "name": "SprintForge",
+  "category": "Productivity",
+  "package": "com.sprintforge.mobile.preview",
+  "website": "https://sprintforge.netwizzard.tech/",
+  "install_url": "https://sprintforge.netwizzard.tech/install",
+  "privacy_url": "https://sprintforge.netwizzard.tech/privacy",
+  "description": "Plan. Build. Test. Deliver. Project, ticket and test management by Olamide Olatayo Bello Corporation.",
+  "features": [
+    "Project dashboards and sprint boards",
+    "Tickets, requirements and linked tests",
+    "Test execution records and release quality gates",
+    "Multi-tenant role-based workspaces",
+    "Android preview client and home-screen web app"
+  ],
+  "limitations": "Internet required. Android development preview uses development signing and may require reinstalling between builds. No native push, background tasks or offline editing. iPhone/iPad use Safari Add to Home Screen; no native iOS package or Play Store release.",
+  "platforms": "Android 8+ development APK \u00b7 Android/iPhone/iPad web app \u00b7 Desktop web",
+  "apk_url": "https://github.com/olamidebello/SprintForge/releases/download/android-preview/sprintforge-preview.apk",
+  "sha256": "bd53125ca943b268a028794b9a20ccef294c8ca25a57199a42e7f5eda46106e5",
+  "download_status": "available",
+  "artifact_kind": "sprintforge-preview",
+  "channel": "development-preview",
+  "signing_certificate_sha256": "495ab509af3827921bfdbbe69d08ffbac362b9ee1f2a1207b30bf59325b05088",
+  "version": "0.1.0"
+}
