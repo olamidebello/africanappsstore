@@ -1,0 +1,32 @@
+---
+- name: Update African Apps Store with Effortless Smiles mobile companion
+  hosts: all
+  become: true
+  vars:
+    effortless_store_source: /opt/effortlesssmiles-store-release
+  tasks:
+    - name: Pull reviewed store source preserving local changes
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africanappsstore.git
+        dest: '{{ effortless_store_source }}'
+        version: main
+        force: false
+    - name: Verify published Android artifact
+      ansible.builtin.command:
+        argv: [sha256sum, -c, effortless-smiles-preview.apk.sha256]
+        chdir: '{{ effortless_store_source }}/static/effortlesssmiles'
+      changed_when: false
+    - name: Install targeted store update with backup and rollback
+      ansible.builtin.command:
+        argv: [python3, '{{ effortless_store_source }}/tools/update_effortlesssmiles.py']
+      register: effortless_update
+      changed_when: "'UPDATED' in effortless_update.stdout"
+    - name: Verify public HTTPS APK download
+      ansible.builtin.uri:
+        url: https://africanappsstore.space/downloads/effortless-smiles-preview.apk
+        method: HEAD
+        status_code: 200
+        validate_certs: true
+    - name: Report release
+      ansible.builtin.debug:
+        msg: 'Effortless Smiles mobile release installed. Existing admin visibility is preserved. The hosted platform currently requires authorized sign-in.'

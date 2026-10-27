@@ -1,0 +1,17 @@
+{
+  "name": "Effortless Smiles",
+  "package": "com.effortlesssmiles.mobile.preview",
+  "version": "0.1.0",
+  "version_code": 1,
+  "channel": "development-preview",
+  "artifact_kind": "effortless-smiles-companion",
+  "sha256": "48b3b9026e771bd8285eb5c86b78ba9b6b0414954cc3af49f32e3f5086384c4d",
+  "signing_certificate_sha256": "3c926b9a44f9788c416a600995cd2174e61b936fddf904459a09cd1e2009ed3f",
+  "size_bytes": 2015782,
+  "min_android": "8.0",
+  "website": "https://effortless-smiles-studio.hazy-tern-4233.chatgpt.site",
+  "apk_url": "https://effortless-smiles-studio.hazy-tern-4233.chatgpt.site/downloads/effortless-smiles-preview.apk",
+  "demo_payments_enabled": false,
+  "demo_purchases_enabled": false,
+  "limitations": "Browser-based companion; internet and platform access required. No native offline transactions, push notifications or background services. Not a Google Play release."
+}

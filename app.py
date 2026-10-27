@@ -54,6 +54,15 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
+        effortless_files={'/downloads/effortless-smiles-preview.apk':('effortless-smiles-preview.apk','application/vnd.android.package-archive'),'/downloads/effortless-smiles-preview.apk.sha256':('effortless-smiles-preview.apk.sha256','text/plain'),'/downloads/effortless-smiles-release.json':('release.json','application/json'),'/downloads/effortless-smiles-icon.svg':('icon.svg','image/svg+xml')}
+        if self.command in ('GET','HEAD') and path in effortless_files:
+            name,mime=effortless_files[path];file=ROOT/'static/effortlesssmiles'/name
+            if not file.is_file():self.send({'error':'Effortless Smiles release not installed'},404);return
+            raw=file.read_bytes();self.send_response(200);self.headers_out(mime,len(raw))
+            if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="effortless-smiles-preview.apk"')
+            self.end_headers()
+            if self.command!='HEAD':self.wfile.write(raw)
+            return
         cellblock_files={'/downloads/cellblock.apk':('cellblock.apk','application/vnd.android.package-archive'),'/downloads/cellblock.apk.sha256':('cellblock.apk.sha256','text/plain'),'/downloads/cellblock-logo.webp':('logo.webp','image/webp'),'/downloads/cellblock-release.json':('release.json','application/json')}
         if self.command in ('GET','HEAD') and path in cellblock_files:
             name,mime=cellblock_files[path];file=ROOT/'static/cellblock'/name
@@ -288,5 +297,6 @@ class Handler(BaseHTTPRequestHandler):
             self.send({'error':'Not found'},404)
 if __name__=='__main__':
     init(); ThreadingHTTPServer((os.environ.get('BIND','127.0.0.1'),int(os.environ.get('PORT','8080'))),Handler).serve_forever()
+
 
 

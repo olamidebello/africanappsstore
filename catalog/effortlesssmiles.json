@@ -1,0 +1,31 @@
+{
+  "name": "Effortless Smiles",
+  "package": "com.effortlesssmiles.mobile.preview",
+  "version": "0.1.0",
+  "version_code": 1,
+  "channel": "development-preview",
+  "artifact_kind": "effortless-smiles-companion",
+  "sha256": "48b3b9026e771bd8285eb5c86b78ba9b6b0414954cc3af49f32e3f5086384c4d",
+  "signing_certificate_sha256": "3c926b9a44f9788c416a600995cd2174e61b936fddf904459a09cd1e2009ed3f",
+  "size_bytes": 2015782,
+  "min_android": "8.0",
+  "website": "https://effortless-smiles-studio.hazy-tern-4233.chatgpt.site/",
+  "apk_url": "https://africanappsstore.space/downloads/effortless-smiles-preview.apk",
+  "demo_payments_enabled": false,
+  "demo_purchases_enabled": false,
+  "limitations": "Browser-based companion; internet and platform access required. No native offline transactions, push notifications or background services. Not a Google Play release. The web platform is currently private; platform access is required. No Apple App Store release.",
+  "domain": "effortlesssmiles.afribulkhub.com",
+  "category": "Lifestyle",
+  "install_url": "https://effortless-smiles-studio.hazy-tern-4233.chatgpt.site/install",
+  "description": "Your smile. Your signature sparkle. Android browser companion for studio bookings, tooth gems, whitening and the smile shop. The hosted platform currently requires authorized ChatGPT sign-in.",
+  "features": [
+    "Signed Android 8+ companion",
+    "Customer, staff and super admin role demos",
+    "Isolated sample records with live purchases and payments blocked",
+    "Browser-based platform sign-in",
+    "Install and checksum information"
+  ],
+  "platforms": "Android 8+ APK \u00b7 iPhone/Android website shortcut",
+  "download_status": "available",
+  "icon_url": "https://africanappsstore.space/downloads/effortless-smiles-icon.svg"
+}
