@@ -1,0 +1,37 @@
+---
+- name: Publish Epa listing on the separate African Apps Store server
+  hosts: all
+  become: true
+  gather_facts: false
+  vars:
+    epa_store_source: /opt/epa-festival-store/source
+  tasks:
+    - name: Check that this host runs the existing Apps Store service
+      ansible.builtin.command:
+        argv: [systemctl, show, africanappsstore.service, -p, LoadState, --value]
+      register: epa_store_service
+      changed_when: false
+    - name: Require the Apps Store server
+      ansible.builtin.assert:
+        that: epa_store_service.stdout | trim == 'loaded'
+        fail_msg: Run this playbook on the Apps Store server, not the game server.
+        quiet: true
+    - name: Ensure listing update tools are installed
+      ansible.builtin.apt:
+        name: [git, python3, ca-certificates]
+        state: present
+    - name: Pull current catalog source while preserving local changes
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africanappsstore.git
+        dest: '{{ epa_store_source }}'
+        version: main
+        force: false
+        update: true
+    - name: Discover actual running database and publish only Epa with backups
+      ansible.builtin.command:
+        argv: [python3, '{{ epa_store_source }}/tools/install_epa.py', --discover, --publish, --verify-public]
+      register: epa_store_result
+      changed_when: true
+    - name: Report verified store listing
+      ansible.builtin.debug:
+        var: epa_store_result.stdout
