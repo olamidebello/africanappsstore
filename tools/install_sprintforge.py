@@ -9,6 +9,7 @@ def install(database,release=None,backup_root=None):
     database=Path(database)
     if not database.is_file():raise ValueError('Existing store database not found')
     meta=json.loads((ROOT/'catalog/sprintforge.json').read_text())
+    meta.update(apk_url=None,sha256='',download_status='install_page')
     if release:
         if release.get('package')!='com.sprintforge.mobile.preview':raise ValueError('Unexpected package')
         meta.update(apk_url='https://github.com/olamidebello/SprintForge/releases/download/android-preview/sprintforge-preview.apk',sha256=release['sha256'],version=release['version'],download_status='available',signing_certificate_sha256=release['signing_certificate_sha256'])
