@@ -19,4 +19,5 @@ class ListingTests(unittest.TestCase):
   text=(Path(__file__).parents[1]/'static/app.js').read_text()
   self.assertEqual(m.frontend(text),text)
   self.assertIn('epafestival.africandroid.world',text)
+  self.assertGreater(text.find("a.domain==='epafestival.africandroid.world'"),text.find('async function hostedCards'))
 if __name__=='__main__':unittest.main()

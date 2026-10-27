@@ -12,10 +12,14 @@ def frontend(text):
         anchor='<a href="${esc(a.website)}" target="_blank" rel="noopener">Open website</a>'
         if anchor not in text:raise ValueError('Unrecognized store frontend; refusing to replace it')
         text=text.replace(anchor,"${a.install_url&&a.install_url.startsWith('https://')?`<a class=\"button\" href=\"${esc(a.install_url)}\" target=\"_blank\" rel=\"noopener noreferrer\">Install on your device</a>`:''}"+anchor)
-    if "a.domain==='epafestival.africandroid.world'" not in text:
-        anchor='<h3>${esc(a.name)}</h3>'
-        if anchor not in text:raise ValueError('Hosted-app card template missing')
-        text=text.replace(anchor,"${a.domain==='epafestival.africandroid.world'?'<img src=\"https://epafestival.africandroid.world/assets/app-192.png\" alt=\"Epa: Spirit of Oro-Ago\" width=\"120\" height=\"120\">':''}"+anchor,1)
+    icon="${a.domain==='epafestival.africandroid.world'?'<img src=\"https://epafestival.africandroid.world/assets/app-192.png\" alt=\"Epa: Spirit of Oro-Ago\" width=\"120\" height=\"120\">':''}"
+    text=text.replace(icon,'')
+    section=text.find('async function hostedCards')
+    if section<0:raise ValueError('Hosted-app section missing')
+    anchor='<h3>${esc(a.name)}</h3>'
+    position=text.find(anchor,section)
+    if position<0:raise ValueError('Hosted-app card template missing')
+    text=text[:position]+icon+text[position:]
     needle="'academy.africandroid.world'].includes(a.domain)?esc(a.platforms)"
     text=text.replace(needle,"'academy.africandroid.world','epafestival.africandroid.world'].includes(a.domain)?esc(a.platforms)")
     return text
