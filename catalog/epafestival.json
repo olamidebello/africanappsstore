@@ -1,0 +1,20 @@
+{
+  "domain": "epafestival.africandroid.world",
+  "name": "Epa: Spirit of Oro-Ago",
+  "category": "Games",
+  "artifact_kind": "installable-web-app",
+  "version": "0.3.0",
+  "website": "https://epafestival.africandroid.world/",
+  "install_url": "https://epafestival.africandroid.world/install.html",
+  "icon_url": "https://epafestival.africandroid.world/assets/app-192.png",
+  "description": "Your Rhythm. Our Roots. One Celebration. A fictional solo festival adventure with a living 2D square, rhythm challenges and creative workshops.",
+  "features": ["Android and iPhone home-screen installation", "Touch and keyboard controls", "Local solo play and offline asset caching", "Character styling and saved outfits", "Square decoration and rhythm composition", "Heritage Stars, preparation quests and local save backup"],
+  "limitations": "Installable web app, not a native APK or app-store release. HTTPS and an initial online visit are required. Browser support varies. Progress is stored locally; export a save before switching environments. No online multiplayer or cloud saves.",
+  "platforms": "Android and iPhone/iPad web app · Desktop browser",
+  "apk_url": null,
+  "sha256": "",
+  "download_status": "install_page",
+  "privacy": "https://epafestival.africandroid.world/privacy.html",
+  "terms": "https://epafestival.africandroid.world/terms.html",
+  "owner": "Olamide Olatayo Bello"
+}
