@@ -25,7 +25,7 @@ def frontend(text):
     return text
 
 
-def install(database,code=None,state=None):
+def install(database,code=None,state=None,publish=False):
     database=Path(database)
     if not database.is_file():raise ValueError('Existing store database not found')
     meta=json.loads((ROOT/'catalog/epafestival.json').read_text())
@@ -43,6 +43,7 @@ def install(database,code=None,state=None):
         with sqlite3.connect(database) as con:
             con.execute('CREATE TABLE IF NOT EXISTS hosted_apps(domain TEXT PRIMARY KEY,metadata TEXT NOT NULL,visible INTEGER NOT NULL DEFAULT 1,updated INTEGER NOT NULL)')
             con.execute('INSERT INTO hosted_apps(domain,metadata,updated) VALUES(?,?,?) ON CONFLICT(domain) DO UPDATE SET metadata=excluded.metadata,updated=excluded.updated',(DOMAIN,json.dumps(meta),int(time.time())))
+            if publish:con.execute('UPDATE hosted_apps SET visible=1 WHERE domain=?',(DOMAIN,))
             if target and new!=old.decode():target.write_text(new)
     except Exception:
         if target and old is not None:target.write_bytes(old)
@@ -50,14 +51,41 @@ def install(database,code=None,state=None):
     return {'domain':DOMAIN,'status':'listing_updated','install_url':meta['install_url'],'backup':str(backup)}
 
 
+
+def discover(prop=None,proc=Path('/proc')):
+    prop=prop or (lambda k:subprocess.check_output(['systemctl','show','africanappsstore.service','-p',k,'--value'],text=True).strip())
+    code=Path(prop('WorkingDirectory'))
+    pid=prop('MainPID')
+    env=dict(x.split('=',1) for x in shlex.split(prop('Environment')) if '=' in x)
+    if pid.isdigit() and int(pid)>0:
+        # Effective process environment includes EnvironmentFile values. Keep it private.
+        for entry in (proc/pid/'environ').read_bytes().split(b'\0'):
+            key,sep,value=entry.partition(b'=')
+            if sep and key in (b'STORE_DATA',b'PORT',b'BIND'):
+                env[key.decode()]=value.decode()
+        code=(proc/pid/'cwd').resolve(strict=True)
+    if not code.is_absolute() or not (code/'static/app.js').is_file():raise ValueError('Existing store frontend not found')
+    data=Path(env.get('STORE_DATA',str(code/'data')))
+    if not data.is_absolute():data=code/data
+    return data/'store.sqlite3',code,int(env.get('PORT','8080'))
+
+
+def verify_catalog(url):
+    opener=urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    with opener.open(url,timeout=20) as response:rows=json.load(response)
+    item=next((r for r in rows if r.get('domain')==DOMAIN),None)
+    if not item or not item.get('visible',True) or item.get('install_url')!='https://'+DOMAIN+'/install.html':
+        raise ValueError('Running store API is missing the visible Epa install listing: '+url)
+    return True
+
+
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--database');p.add_argument('--discover',action='store_true');a=p.parse_args()
-    database=a.database;code=None
-    if a.discover:
-        def prop(k):return subprocess.check_output(['systemctl','show','africanappsstore.service','-p',k,'--value'],text=True).strip()
-        env=dict(x.split('=',1) for x in shlex.split(prop('Environment')) if '=' in x)
-        database=str(Path(env.get('STORE_DATA','/var/lib/africanappsstore'))/'store.sqlite3');code=prop('WorkingDirectory')
-        if not Path(code).is_absolute() or not (Path(code)/'static/app.js').is_file():raise ValueError('Existing store frontend not found')
+    p=argparse.ArgumentParser();p.add_argument('--database');p.add_argument('--discover',action='store_true');p.add_argument('--publish',action='store_true',help='Make only the Epa listing visible');p.add_argument('--verify-public',action='store_true');a=p.parse_args()
+    database=a.database;code=None;port=None
+    if a.discover:database,code,port=discover()
     if not database:p.error('--database or --discover required')
-    result=install(database,code)
+    result=install(database,code,publish=a.publish)
+    result['database']=str(database)
+    if a.discover:result['local_listing_verified']=verify_catalog('http://127.0.0.1:'+str(port)+'/api/hosted-apps?epa_check='+str(time.time_ns()))
+    if a.verify_public:result['public_listing_verified']=verify_catalog('https://africanappsstore.space/api/hosted-apps?epa_check='+str(time.time_ns()))
     print(json.dumps(result))
