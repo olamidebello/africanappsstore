@@ -73,6 +73,23 @@
         - /downloads/africa-media-android-debug.apk
         - /downloads/africa-media-android-debug.apk.sha256
         - /downloads/africa-media-release.json
+    - name: Verify exact public APK bytes after all services have been updated
+      ansible.builtin.command:
+        argv:
+          - python3
+          - -c
+          - |
+            import hashlib,json,sys,urllib.request
+            from pathlib import Path
+            expected=json.loads(Path(sys.argv[1]).read_text())
+            request=urllib.request.Request('https://africanappsstore.space/downloads/africa-media-android-debug.apk',headers={'Cache-Control':'no-cache'})
+            with urllib.request.urlopen(request,timeout=60) as response:
+                raw=response.read(expected['size_bytes']+1)
+            if len(raw)!=expected['size_bytes'] or hashlib.sha256(raw).hexdigest()!=expected['sha256']:
+                raise SystemExit('Public APK mismatch: inspect the public domain DNS/backend and store service paths')
+            print('Public Media APK checksum verified')
+          - '{{ media_store_source }}/static/media/release.json'
+      changed_when: false
     - name: Report published release
       ansible.builtin.debug:
         msg:

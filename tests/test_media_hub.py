@@ -37,3 +37,13 @@ class MediaHubListing(unittest.TestCase):
    self.assertEqual(hashlib.sha256(apk.read_bytes()).hexdigest(),release['sha256'])
    with patch.object(listing.urllib.request,'urlopen',side_effect=AssertionError('unexpected redownload')):
     listing.ensure_package(Path(folder))
+ def test_existing_verified_apk_permissions_are_repaired(self):
+  import hashlib,os
+  with tempfile.TemporaryDirectory() as folder:
+   root=Path(folder);static=root/'static/media';static.mkdir(parents=True);apk=static/'africa-media-android-debug.apk';raw=b'verified fixture';apk.write_bytes(raw);apk.chmod(0o600);static.chmod(0o700)
+   release={'sha256':hashlib.sha256(raw).hexdigest(),'size_bytes':len(raw)}
+   (static/'release.json').write_text(json.dumps(release));(static/'africa-media-android-debug.apk.sha256').write_text(release['sha256']+'  '+apk.name)
+   with patch.object(listing,'ROOT',root),patch.object(listing.urllib.request,'urlopen',side_effect=AssertionError('unexpected download')):
+    listing.ensure_package(static)
+   self.assertEqual(apk.stat().st_mode&0o777,0o644)
+   self.assertEqual(static.stat().st_mode&0o777,0o755)

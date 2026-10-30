@@ -14,6 +14,8 @@ def ensure_package(static):
    data=archive.read(entry)
   if hashlib.sha256(data).hexdigest()!=release['sha256']:raise ValueError('APK checksum mismatch')
   temporary=apk.with_suffix('.apk.pending');temporary.write_bytes(data);temporary.chmod(0o644);temporary.replace(apk)
+ apk.chmod(0o644)
+ static.chmod(0o755)
  for name in ['release.json','africa-media-android-debug.apk.sha256']:
   target=static/name;target.write_bytes((ROOT/'static/media'/name).read_bytes());target.chmod(0o644)
  return release

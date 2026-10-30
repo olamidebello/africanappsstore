@@ -17,10 +17,16 @@ def main():
  try:
   for name in ['africa-media-android-debug.apk','africa-media-android-debug.apk.sha256','release.json']:
    path=folder/name;saved[path]=path.read_bytes() if path.exists() else None;shutil.copyfile(ROOT/'static/media'/name,path)
-  if 'media_hub_files=' not in old:
-   source=(ROOT/'app.py').read_text();start=source.index('        media_hub_files=');end=source.index('        effortless_files=',start);marker='        path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)'
-   if marker not in old:raise ValueError('Store routing changed; targeted patch cannot be applied safely')
-   target.write_text(old.replace(marker,marker+'\n'+source[start:end],1));subprocess.run(['python3','-m','py_compile',target],check=True)
+  source=(ROOT/'app.py').read_text();start=source.index('        media_hub_files=');end=source.index('        effortless_files=',start);block=source[start:end]
+  if '        media_hub_files=' in old:
+   begin=old.index('        media_hub_files=');finish=old.index('        effortless_files=',begin)
+   patched=old[:begin]+block+old[finish:]
+  else:
+   marker='        path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)'
+   if old.count(marker)!=1:raise ValueError('Store routing changed; targeted patch cannot be applied safely')
+   patched=old.replace(marker,marker+'\n'+block,1)
+  if patched!=old:
+   target.write_text(patched);subprocess.run(['python3','-m','py_compile',target],check=True)
   result=installer.install(db,folder);subprocess.run(['systemctl','restart','africanappsstore.service'],check=True)
   expected=json.loads((folder/'release.json').read_text())
   for attempt in range(12):

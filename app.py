@@ -57,6 +57,9 @@ class Handler(BaseHTTPRequestHandler):
         media_hub_files={'/downloads/africa-media-android-debug.apk':('africa-media-android-debug.apk','application/vnd.android.package-archive'),'/downloads/africa-media-android-debug.apk.sha256':('africa-media-android-debug.apk.sha256','text/plain'),'/downloads/africa-media-release.json':('release.json','application/json')}
         if self.command in ('GET','HEAD') and path in media_hub_files:
             name,mime=media_hub_files[path];file=ROOT/'static/media'/name
+            if name=='africa-media-android-debug.apk':
+                candidates=[file,Path('/var/lib/africa-media/downloads/africa-media-android-debug.apk')]
+                file=next((candidate for candidate in candidates if candidate.is_file() and os.access(candidate,os.R_OK)),file)
             if not file.is_file():self.send({'error':'Media APK not installed'},404);return
             raw=file.read_bytes();self.send_response(200);self.headers_out(mime,len(raw))
             if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="africa-media-android-debug.apk"')
