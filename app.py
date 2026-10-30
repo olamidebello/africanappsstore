@@ -54,6 +54,15 @@ class Handler(BaseHTTPRequestHandler):
         except Exception:self.send({'error':'Internal server error'},500)
     def route(self):
         path=urlparse(self.path).path; query=parse_qs(urlparse(self.path).query)
+        media_hub_files={'/downloads/africa-media-android-debug.apk':('africa-media-android-debug.apk','application/vnd.android.package-archive'),'/downloads/africa-media-android-debug.apk.sha256':('africa-media-android-debug.apk.sha256','text/plain'),'/downloads/africa-media-release.json':('release.json','application/json')}
+        if self.command in ('GET','HEAD') and path in media_hub_files:
+            name,mime=media_hub_files[path];file=ROOT/'static/media'/name
+            if not file.is_file():self.send({'error':'Media APK not installed'},404);return
+            raw=file.read_bytes();self.send_response(200);self.headers_out(mime,len(raw))
+            if path.endswith('.apk'):self.send_header('Content-Disposition','attachment; filename="africa-media-android-debug.apk"')
+            self.end_headers()
+            if self.command!='HEAD':self.wfile.write(raw)
+            return
         effortless_files={'/downloads/effortless-smiles-preview.apk':('effortless-smiles-preview.apk','application/vnd.android.package-archive'),'/downloads/effortless-smiles-preview.apk.sha256':('effortless-smiles-preview.apk.sha256','text/plain'),'/downloads/effortless-smiles-release.json':('release.json','application/json'),'/downloads/effortless-smiles-icon.svg':('icon.svg','image/svg+xml')}
         if self.command in ('GET','HEAD') and path in effortless_files:
             name,mime=effortless_files[path];file=ROOT/'static/effortlesssmiles'/name

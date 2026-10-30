@@ -1,0 +1,80 @@
+---
+- name: Publish verified Media phone-to-TV APK and update its store listing
+  hosts: all
+  become: true
+  vars:
+    media_store_source: /opt/africa-media-store-release
+  tasks:
+    - name: Install publishing prerequisites
+      ansible.builtin.apt:
+        name: [git, python3]
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+    - name: Pull store publishing source without discarding local edits
+      ansible.builtin.git:
+        repo: https://github.com/olamidebello/africanappsstore.git
+        dest: '{{ media_store_source }}'
+        version: main
+        force: false
+    - name: Download pinned APK and update only the Media store release with backup and rollback
+      ansible.builtin.command:
+        argv: [python3, '{{ media_store_source }}/tools/update_media_hub.py']
+      register: media_store_update
+      changed_when: "'UPDATED' in media_store_update.stdout"
+    - name: Check Media service account on this host
+      ansible.builtin.getent:
+        database: passwd
+        key: africa-media
+        fail_key: false
+    - name: Create Media download directory when Media is hosted here too
+      ansible.builtin.file:
+        path: /var/lib/africa-media/downloads
+        state: directory
+        owner: africa-media
+        group: africa-media
+        mode: '0755'
+      when: ansible_facts.getent_passwd['africa-media'] | default(none) != none
+    - name: Publish APK to Media download directory when hosted on this server
+      ansible.builtin.copy:
+        src: '{{ media_store_source }}/static/media/africa-media-android-debug.apk'
+        dest: /var/lib/africa-media/downloads/africa-media-android-debug.apk
+        remote_src: true
+        owner: africa-media
+        group: africa-media
+        mode: '0644'
+      when: ansible_facts.getent_passwd['africa-media'] | default(none) != none
+    - name: Update Media server interface and publish the same APK when cohosted
+      ansible.builtin.command:
+        argv:
+          - ansible-pull
+          - -U
+          - https://github.com/olamidebello/Media.git
+          - -C
+          - main
+          - -d
+          - /opt/africa-media-tv-bootstrap
+          - -i
+          - localhost,
+          - -c
+          - local
+          - ansible/deploy-phone-tv-install.yml
+          - -e
+          - '{{ {"media_package_dir": media_store_source + "/static/media"} | to_json }}'
+      when: ansible_facts.getent_passwd['africa-media'] | default(none) != none
+      changed_when: true
+    - name: Verify public store download and release metadata
+      ansible.builtin.uri:
+        url: 'https://africanappsstore.space{{ item }}'
+        method: HEAD
+        status_code: 200
+        validate_certs: true
+      loop:
+        - /downloads/africa-media-android-debug.apk
+        - /downloads/africa-media-android-debug.apk.sha256
+        - /downloads/africa-media-release.json
+    - name: Report published release
+      ansible.builtin.debug:
+        msg:
+          - 'APK: https://africanappsstore.space/downloads/africa-media-android-debug.apk'
+          - 'Development-signed APK; existing administrator listing visibility preserved. Installation signature conflicts and physical TV tests remain device-specific.'

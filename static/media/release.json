@@ -1,0 +1,14 @@
+{
+  "package": "com.africamedia.hub",
+  "version": "1.0.0",
+  "version_code": 1,
+  "channel": "development",
+  "sha256": "453e68b57d9f8b60d00ba35d77c283ab59f891fa85cdf54cf0f9a44abeb243c9",
+  "size_bytes": 13146348,
+  "signing_certificate_sha256": "2fd970a9c6bb52df36811a49de7c62cf70b3566807891ce7967a1c0e0a7edf37",
+  "artifact_url": "https://nightly.link/olamidebello/Media/actions/runs/40976673478/android-phone-tablet-tv-fire-development.zip",
+  "artifact_sha256": "216aa0db466cbefbc08902c753df170aa904008c7759e37cc797e68bc143dcc9",
+  "artifact_expires": "2027-01-27",
+  "source_commit": "61bfa61fa49b1ebc58af6a7c0e8fd0948b5b3c1d",
+  "build_run": 40976673478
+}

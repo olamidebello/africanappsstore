@@ -154,3 +154,17 @@ bash /root/publish-kakakin.sh
 ```
 
 The bootstrap preserves source edits, updates the existing store with database/code backups, checks the locally served APK checksum and catalog entry, then verifies public HTTPS downloads and catalog. No Kakakin application rebuild or administrator password is needed. From a controller already authorized for SSH to the store, use `ansible-playbook -i '181.214.149.146,' -u root ansible/publish-mobile.yml` in the Kakakin checkout instead. SSH authorization must already exist; the script does not copy credentials or change DNS to work around missing access.
+
+## Publish Media phone-to-TV Android APK
+
+On the server hosting African Apps Store:
+
+```bash
+ansible-pull -U https://github.com/olamidebello/africanappsstore.git -C main \
+  -d /opt/africa-media-store-bootstrap -i localhost, -c local \
+  ansible/deploy-media-phone-tv-apk.yml
+```
+
+This downloads the pinned successful Media Actions artifact through nightly.link, verifies the archive SHA-256 and APK SHA-256/size, backs up the existing store code/database, publishes the APK and updates only the Media catalog record. It preserves administrator visibility and rolls back the targeted store changes if verification fails. If the Media service account also exists on this server, the same APK is copied to `/var/lib/africa-media/downloads`. The source artifact expires January 27, 2027; once deployed the store keeps its own APK copy. A future release needs a new pinned manifest. No GitHub token is needed for the public download relay. The release is a development-signed universal APK, not a Play Store release; existing APK signing conflicts may require separate user action, and no app is automatically uninstalled.
+
+Download after successful deployment: `https://africanappsstore.space/downloads/africa-media-android-debug.apk`. Server deployment does not install it on phones or TVs. The phone must install the new APK, then pair/approve the TV through Install on device. Android package signature and package ID were verified before preparing this release; physical TV testing remains pending.

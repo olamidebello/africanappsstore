@@ -7,7 +7,7 @@
   "install_url": "https://media.africandroid.world/install",
   "privacy_url": "https://media.africandroid.world/legal/privacy",
   "icon_url": "/static/africa-media-icon.svg",
-  "platforms": "Web · Mobile · Desktop · Compatible smart TV browsers",
+  "platforms": "Android 8+ universal development APK \u00b7 Android / Fire TV \u00b7 Web \u00b7 Desktop builds",
   "description": "Africa Creates. The World Connects. Discover live television, news, music, movies and family entertainment through Africa Media Hub.",
   "features": [
     "Live channel guide and search by country",
@@ -15,10 +15,19 @@
     "Last-watched startup, favorite channels and previous-channel recall",
     "Low-data mode and playback recovery for compatible streams",
     "Provider links with in-app and external viewing options",
-    "Device-specific installation guidance and available downloads"
+    "Device-specific installation guidance and available downloads",
+    "Pair an Android phone with compatible Android / Fire TV and install directly",
+    "Desktop active LAN scan and MAC information where available",
+    "My Streaming profile-private cameras with outbound gateway snapshots"
   ],
-  "limitations": "Internet required. Playback, lower-quality variants and remote support depend on device and source. Third-party services may require subscriptions or restrict viewing by region. Native packages appear on the install page only when published; this listing does not guarantee every device has an installable package.",
-  "apk_url": null,
-  "sha256": "",
-  "download_status": "install_page"
+  "limitations": "Development-signed APK; physical TV pairing/install testing pending. TV debugging and approval required. Samsung Tizen, LG webOS, Roku and Apple TV cannot use Android APKs. Camera remote viewing requires a paired always-on LAN gateway and provides snapshots, without audio. Signing conflicts with older builds may prevent an update; existing apps are never automatically uninstalled.",
+  "apk_url": "https://africanappsstore.space/downloads/africa-media-android-debug.apk",
+  "sha256": "453e68b57d9f8b60d00ba35d77c283ab59f891fa85cdf54cf0f9a44abeb243c9",
+  "download_status": "available",
+  "version": "1.0.0",
+  "version_code": 1,
+  "size_bytes": 13146348,
+  "signing_certificate_sha256": "2fd970a9c6bb52df36811a49de7c62cf70b3566807891ce7967a1c0e0a7edf37",
+  "channel": "development",
+  "release_notes": "Android phone-to-TV pairing and APK transfer; LAN device identification; private profile camera snapshots through a gateway."
 }
